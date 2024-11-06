@@ -13,43 +13,51 @@
 
 package E63C.Lucas.LP01;
 
+import java.util.Set;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-/**
- * @author Lenovo
- *
- */
+import jakarta.persistence.OneToMany;
+
 @Entity
 public class Account_type {
+    
+    @Id 
+    @GeneratedValue(strategy = GenerationType.IDENTITY) 
+    private int id;
 
-	private int ID;
-	private String Name;
-	private String Description;
-	
-	@Id 
-	@GeneratedValue(strategy=GenerationType.IDENTITY) 
-	
-	public int getID() {
-		return ID;
-	}
-	public void setID(int iD) {
-		ID = iD;
-	}
-	public String getName() {
-		return Name;
-	}
-	public void setName(String name) {
-		Name = name;
-	}
-	public String getDescription() {
-		return Description;
-	}
-	public void setDescription(String description) {
-		Description = description;
-	}
-	
-	
-	
+    private String name;  // Renamed from 'Name' to 'name' (lowercase)
+    private String description;  // Renamed from 'Description' to 'description'
+
+    @OneToMany(mappedBy = "account_type")
+    private Set<Card> card;
+
+    // Default constructor
+    public Account_type() {}
+
+    // Getters and Setters
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }   
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }
