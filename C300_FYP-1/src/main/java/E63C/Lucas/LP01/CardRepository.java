@@ -16,13 +16,16 @@ package E63C.Lucas.LP01;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 /**
  * @author Lenovo
  *
  */
-public interface CardRepository extends JpaRepository<Card,Integer>{
-	/*
-	 * List<Card> findByName(String name);
-	 */
+public interface CardRepository extends JpaRepository<Card, Integer> {
+
+    @Query("SELECT c FROM Card c WHERE c.Cardnumber = :cardnumber")
+    List<Card> findByCardnumber(@Param("cardnumber") int cardnumber);
 }
+
