@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>RP Digital Bank - Add Member</title>
+<link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+<script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script th:if="${duplicateAccountIdError}">
+        alert("Account ID already exists! Please enter a unique Account ID.");
+    </script>
+</head>
+<body>
+	<div class="container">
+		<h1>Add New Member</h1>
+		<form class="needs-validation" th:action="@{/Member/save}"
+			method="post" th:object="${member}" novalidate>
+			<!-- Account ID -->
+			<div class="mb-3 col-5">
+				<label for="accountID" class="form-label">Account ID</label> <input
+					id="accountID" type="text" class="form-control"
+					th:field="*{accountID}" required />
+				<div class="invalid-feedback">Please enter a valid Account ID</div>
+				<p class="text-danger" th:if="${#fields.hasErrors('accountID')}"
+					th:errors="*{accountID}"></p>
+			</div>
+
+			<!-- Name -->
+			<div class="mb-3 col-5">
+				<label for="name" class="form-label">Name</label> <input id="name"
+					type="text" class="form-control" th:field="*{name}" required
+					minlength="3" />
+				<div class="invalid-feedback">Please enter a valid Name</div>
+				<p class="text-danger" th:if="${#fields.hasErrors('name')}"
+					th:errors="*{name}"></p>
+			</div>
+
+			<!-- Email -->
+			<div class="mb-3 col-5">
+				<label for="email" class="form-label">Email</label> <input
+					id="email" type="email" class="form-control" th:field="*{email}"
+					required />
+				<div class="invalid-feedback">Please enter a valid Email</div>
+				<p class="text-danger" th:if="${#fields.hasErrors('email')}"
+					th:errors="*{email}"></p>
+			</div>
+
+			<!-- Role -->
+			<div class="mb-3 col-5">
+				<label for="role" class="form-label">Role</label> <input id="role"
+					type="text" class="form-control" th:field="*{role}" required />
+				<div class="invalid-feedback">Please enter a valid Role</div>
+				<p class="text-danger" th:if="${#fields.hasErrors('role')}"
+					th:errors="*{role}"></p>
+			</div>
+
+			<!-- NRIC -->
+			<div class="mb-3 col-5">
+				<label for="nRIC" class="form-label">NRIC</label> <input id="nRIC"
+					type="text" class="form-control" th:field="*{nRIC}" required />
+				<div class="invalid-feedback">Please enter a valid NRIC</div>
+				<p class="text-danger" th:if="${#fields.hasErrors('nRIC')}"
+					th:errors="*{nRIC}"></p>
+			</div>
+
+			<!-- Bank Name -->
+			<div class="mb-3 col-5">
+				<label for="bankName" class="form-label">Bank Name</label> <input
+					id="bankName" type="text" class="form-control"
+					th:field="*{bankName}" required />
+				<div class="invalid-feedback">Please enter a valid Bank Name</div>
+				<p class="text-danger" th:if="${#fields.hasErrors('bankName')}"
+					th:errors="*{bankName}"></p>
+			</div>
+
+			<!-- Gender -->
+			<div class="mb-3 col-5">
+				<label for="gender" class="form-label">Gender</label> <select
+					id="gender" class="form-select" th:field="*{gender}" required>
+					<option value="">Choose one(M/F)</option>
+					<option value="Male">M</option>
+					<option value="Female">F</option>
+				</select>
+				<div class="invalid-feedback">Please select a Gender</div>
+			</div>
+			<div class="mb-3">
+				<label for="dob" class="form-label">Date of Birth</label> <input
+					type="date" class="form-control" id="dob"   
+ th:field="*{dob}"
+					required>
+				<div class="invalid-feedback">Please enter a valid date of
+					birth.</div>
+			</div>
+
+			<div class="mb-3">
+				<label for="mobile" class="form-label">Mobile Number</label> <input
+					type="tel" class="form-control" id="mobile"
+					  
+ th:field="*{mobile}" required pattern="[0-9]{8}">
+				<div class="invalid-feedback">Please enter a valid 8-digit
+					mobile number.</div>
+			</div>
+
+			<div class="mb-3">
+				<label for="country" class="form-label">Country</label> <input
+					type="text" class="form-control" id="country" th:field="*{country}"
+					  
+ required>
+				<div class="invalid-feedback">Please   enter a valid country.</div>
+			</div>
+
+			<button type="submit" class="btn btn-primary">Add Member</button>
+		</form>
+
+		<script>
+  //for form validation
+  (function () {
+    'use strict'
+
+    // Fetch all the forms 
+    var forms = document.querySelectorAll('.needs-validation')
+
+    // Loop over them and prevent submission
+    Array.prototype.slice.call(forms)
+      .forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+          if (!form.checkValidity()) {
+            event.preventDefault()
+            event.stopPropagation()
+          }
+
+          form.classList.add('was-validated')
+        }, false)
+      })
+  })()
+</script>
+	</div>
+</body>
+</html>

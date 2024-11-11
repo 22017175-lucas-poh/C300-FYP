@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>RP Digital Bank - View Members </title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" integrity="sha384-0evSX huddled7lwJEuBfRn5qIBFyJpBv/adjxXvNW/4SYvNCHayEUwFQXoaSH1zL" crossorigin="anonymous">
+</head>
+<body>
+    <h1>View Members</h1>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Account ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>NRIC</th>
+                <th>Bank Name</th>
+                <th>Gender</th>
+                <th>Date of Birth</th>
+                <th>Mobile</th>
+                <th>Country</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="member : ${listMember}">
+                <td th:text="${member.accountID}"></td>
+                <td th:text="${member.name}"></td>
+                <td th:text="${member.email}"></td>
+                <td th:text="${member.role}"></td>
+                <td th:text="${member.nRIC}"></td>
+                <td th:text="${member.bankName}"></td>
+                <td th:text="${member.gender}"></td>
+                <td th:text="${#dates.format(member.dob, 'yyyy-MM-dd')}"></td>
+                <td th:text="${member.mobile}"></td>
+                <td th:text="${member.country}"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="/Member/add">Add Member</a>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-OgwbZS749si9qIkU7jkUXl65JYawEo3QQQgkSYiHqZBVUjDjyBXIFvAdJDfwCSLfQasdhXa65yYwR5OogeFzSrhznvHRVB8NU" crossorigin="anonymous"></script>
+</body>
+</html>
