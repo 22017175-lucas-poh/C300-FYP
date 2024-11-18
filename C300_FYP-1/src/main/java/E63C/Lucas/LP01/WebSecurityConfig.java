@@ -15,10 +15,12 @@ public class WebSecurityConfig {
 	public MemberDetailsService memberDetailsService() {
 		return new MemberDetailsService();
 	}
+
 	@Bean
 	public BCryptPasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
+
 	@Bean
 	public DaoAuthenticationProvider authenticationProvider() {
 		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -27,17 +29,19 @@ public class WebSecurityConfig {
 		return authProvider;
 
 	}
+
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
-	        	.requestMatchers("/").permitAll() //Home page is visible without logging in
-	        	.requestMatchers("/bootstrap/*/*").permitAll() //for static resources, visible to all
-	        	.requestMatchers("/images/*").permitAll() //for static resources, visible to all
-	            .anyRequest().authenticated())//Any other requests not specified earlier     		
-			.formLogin((login) -> login.permitAll().defaultSuccessUrl("/")) //Goes to homepage upon login
-			.logout((logout) -> logout.logoutSuccessUrl("/"));//Goes to homepage upon logout
+				.requestMatchers("/Card/delete/*", "/Account_type", "/Account_type/add", "/Account_type/edit/*")
+				.hasRole("ADMIN").requestMatchers("/").permitAll() // Home page is visible without logging in
+				.requestMatchers("/bootstrap/*/*").permitAll() // for static resources, visible to all
+				.requestMatchers("/images/*").permitAll() // for static resources, visible to all
+				.anyRequest().authenticated())// Any other requests not specified earlier
+				.formLogin((login) -> login.loginPage("/login").permitAll().defaultSuccessUrl("/")) // Goes to homepage upon login
+				.logout((logout) -> logout.logoutSuccessUrl("/"))// Goes to homepage upon logout
+				.exceptionHandling((exceptionHandling) -> exceptionHandling.accessDeniedPage("/403"));
 
 		return http.build();
 	}
 }
-

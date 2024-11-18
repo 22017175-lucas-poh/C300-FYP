@@ -3,10 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Responsive Hamburger Menu</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-</head>
 <style>
 * {
     margin: 0;
@@ -19,11 +16,14 @@
 a {
     color: white;
 }
+
 a:visited {
     color: white;
 }
+
 a:hover {
     color: #FFFFFF;
+    text-decoration: underline;
 }
 
 body {
@@ -33,34 +33,40 @@ body {
 
 .off-screen-menu {
     background-color: rgb(0, 128, 0);
-    height: 100vh;
-    width: 100%;
-    max-width: 450px;
+    height: 400px;
+    width: 400px;
     position: fixed;
-    top: 0;
-    right: -450px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     display: flex;
     flex-direction: column;
-    align-items: center;    
+    align-items: center;
     justify-content: center;
     text-align: center;
-    font-size: 3rem;
-    transition: .3s ease;
+    font-size: 1.5rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
 }
+
 .off-screen-menu.active {
-    right: 0;
+    opacity: 1;
+    visibility: visible;
 }
 
 nav {
     padding: 1rem;
     display: flex;
-    justify-content: space-between; /* Space between the logo and the menu */
-    align-items: center; /* Align items vertically in the center */
+    justify-content: space-between;
+    align-items: center;
     background-color: rgb(0, 128, 0);
 }
 
 nav .navbar-brand img {
-    height: 40px; 
+    height: 40px;
 }
 
 .ham-menu {
@@ -68,7 +74,9 @@ nav .navbar-brand img {
     width: 40px;
     margin-left: auto;
     position: relative;
+    cursor: pointer;
 }
+
 .ham-menu span {
     height: 5px;
     width: 100%;
@@ -80,43 +88,90 @@ nav .navbar-brand img {
     transform: translate(-50%, -50%);
     transition: .3s ease;
 }
+
 .ham-menu span:nth-child(1) {
     top: 25%;
 }
+
 .ham-menu span:nth-child(3) {
     top: 75%;
 }
+
 .ham-menu.active span {
     background-color: white;
 }
+
 .ham-menu.active span:nth-child(1) {
     top: 50%;
     transform: translate(-50%, -50%) rotate(45deg);
 }
+
 .ham-menu.active span:nth-child(2) {
     opacity: 0;
 }
+
 .ham-menu.active span:nth-child(3) {
     top: 50%;
     transform: translate(-50%, -50%) rotate(-45deg);
 }
+
+.off-screen-menu a {
+    color: white;
+    text-decoration: none;
+}
+
+.off-screen-menu a:hover {
+    color: #FFFFFF;
+    text-decoration: underline;
+}
+
+.off-screen-menu form button {
+    background-color: transparent;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    text-align: center;
+    padding: 0;
+    outline: none;
+    box-shadow: none;
+}
+
+.off-screen-menu form button:hover,
+.off-screen-menu form button:focus,
+.off-screen-menu form button:active {
+    color: white;
+    background-color: transparent;
+    outline: none;
+    border: none;
+    text-decoration: underline;
+    box-shadow: none;
+}
 </style>
+</head>
 <body>
 
     <div class="off-screen-menu">
-        <a href="#">Home</a> 
-        <a href="#">Manage Card</a> 
+        <a href="#">Home</a>
+        <a href="/Card">Manage Card</a>
+        <!--will need to change Card to match the user Id so that user is only able to view own Card  -->
         <a href="#">Book Consultation</a>
+
+        <a sec:authorize="!isAuthenticated()" href="/login">Login</a>
+
+        <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post">
+            <button class="btn nav-link" type="submit">Logout</button>
+        </form>
     </div>
 
     <nav>
         <a class="navbar-brand" href="#">
-            <img src="/images/Rp_logo.png" alt="Logo"> 
+            <img src="/images/Rp_logo.png" alt="Logo">
         </a>
 
         <div class="ham-menu">
-            <span></span> 
-            <span></span> 
+            <span></span>
+            <span></span>
             <span></span>
         </div>
     </nav>

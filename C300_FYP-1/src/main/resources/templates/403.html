@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>RP Digital Bank - Error</title>
+<link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+<script src="/bootstrap/js/bootstrap.min.js"></script>
+<style>
+    .error-image-container {
+        position: fixed;
+        bottom: 10px; 
+        left: 20%; 
+        transform: translateX(-50%); /
+        text-align: center;
+    }
+
+    .error-image {
+        width: 400px; 
+        height: auto; 
+        opacity: 1; 
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        <div th:replace="fragments/header"></div>
+        <br>
+        <h1>Oops..!</h1>
+        <h1>Access Denied</h1>
+        <h2>The page that you were trying to reach is not available to you.</h2>
+        <!-- 	<div th:replace="fragments/footer"></div> -->
+    </div>
+
+    <div class="error-image-container">
+        <img src="/images/error-403.png" alt="Error 403" class="error-image">
+    </div>
+</body>
+</html>
