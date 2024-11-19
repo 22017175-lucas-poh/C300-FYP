@@ -27,8 +27,8 @@ public class Account_type {
     @GeneratedValue(strategy = GenerationType.IDENTITY) 
     private int id;
 
-    private String name;  // Renamed from 'Name' to 'name' (lowercase)
-    private String description;  // Renamed from 'Description' to 'description'
+    private String name;  
+    private String description; 
 
     @OneToMany(mappedBy = "account_type")
     private Set<Card> card;

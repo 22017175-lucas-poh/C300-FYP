@@ -14,11 +14,15 @@
 package E63C.Lucas.LP01;
 
 import java.sql.Date;
+import java.util.Set;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 
@@ -53,6 +57,10 @@ public class Member {
 	private int failedAttempt;
 	private Date lockTime;
 
+	@OneToMany(mappedBy = "member")
+	private Set<Consultation> consultations;
+
+	
 	public String getUsername() {
 		return username;
 	}
