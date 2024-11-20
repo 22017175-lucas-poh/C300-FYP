@@ -40,12 +40,12 @@ public class MemberController {
 		List<Member> listmembers= memberRepository.findAll();
 		
 		model.addAttribute("listmembers",listmembers);
-		return"view_members";		
+		return"viewMember";		
 	}
 	@GetMapping("/Member/add")
 	public String addMember(Model model) {
 		model.addAttribute("member", new Member	());
-		return"add_Member";
+		return"AddMember";
 	}
 	@PostMapping("/Member/save")
 	public String saveMember(@Valid Member member, BindingResult bindingResult, RedirectAttributes redirectAttribute, Model model) {

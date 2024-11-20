@@ -14,9 +14,10 @@
 package E63C.Lucas.LP01;
 
 import java.util.List;
-import java.util.Locale.Category;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +33,9 @@ public class Account_type_controller {
 
 	@Autowired
 	private AccountRepository accountrepository;
+    
+
+    
 
 	@GetMapping("/Account_type")
 	public String ViewAccount_type(Model model) {
@@ -103,4 +107,7 @@ public class Account_type_controller {
 		return "redirect:/Account_type";
 	}
 
+
+
 }
+

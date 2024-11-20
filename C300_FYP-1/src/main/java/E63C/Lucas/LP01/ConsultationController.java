@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * 
@@ -21,10 +22,9 @@ public class ConsultationController {
 	
 	@GetMapping("/consultations")
 	public String viewConsultations(Model model) {
-		List<Consultation> listconsultations= consultationRepository.findAll();
-		
-		model.addAttribute("listconsultations",listconsultations);
-		return"view_consultations";		
+	    List<Consultation> listConsultations = consultationRepository.findAll();
+	    model.addAttribute("listConsultations", listConsultations);
+	    return "ViewConsultation"; // Ensure this matches your HTML file name
 	}
 
     @GetMapping("/consultations/book")
@@ -33,12 +33,20 @@ public class ConsultationController {
         return "BookConsultation"; // Renders the booking form
     }
     @PostMapping("/consultations/book/save")
-    public String SaveBooking(Consultation consultation, Model model) {
-    	consultationRepository.save(consultation);
-		return "redirect:/Account_type";
-	}
-	
-	
-	
-	
+    public String saveBooking(Consultation consultation, int memberId, Model model) {
+        // Fetch the Member from the database
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new IllegalArgumentException("Invalid member ID: " + memberId));
+
+        // Set the Member in the Consultation entity
+        consultation.setMember(member);
+
+        // Save the consultation
+        consultationRepository.save(consultation);
+
+        // Redirect to View Consultations
+        return "redirect:/consultations";
+    }
+
 }
+

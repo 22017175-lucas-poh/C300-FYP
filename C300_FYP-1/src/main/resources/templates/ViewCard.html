@@ -35,7 +35,7 @@
 
         <h1>View Cards</h1>
         <table class="table table-bordered">
-            <a href="/Card/add" class="btn btn-primary">Add Card</a>
+            <a href="/Card/add" class="btn btn-primary">Apply for Card</a>
 
             <thead>
                 <tr>
@@ -51,14 +51,14 @@
                 <th:block th:each="Card : ${listCard}">
                     <tr>
                         <td th:text="${Card.account_type.name}"></td>
-                        <td th:text="${Card.cardnumber}"></td>
+                        <td th:text="${Card.cardNumber}"></td>
                         <td th:text="${Card.CVV}"></td>
                         <td th:text="${Card.expiryDate}"></td>
                         <td th:text="${Card.bankName}"></td>
 
-                        <td><a th:href="@{/Card/edit/{id}(id=${Card.cardnumber})}"
+                        <td><a th:href="@{/Card/edit/{id}(id=${Card.cardNumber})}"
                             class="text-primary">Edit</a> | <a
-                            th:href="@{/Card/delete/{id}(id=${Card.cardnumber})}"
+                            th:href="@{/Card/delete/{id}(id=${Card.cardNumber})}"
                             class="text-primary" onclick="return confirmDelete();">Delete</a>
                         </td>
 
