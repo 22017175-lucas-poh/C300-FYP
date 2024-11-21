@@ -1,12 +1,14 @@
 package E63C.Lucas.LP01;
 
 import java.sql.Date;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 
 @Entity
 public class Card {
@@ -20,6 +22,7 @@ public class Card {
     private int CVV;
     private Date expiryDate;
     private String bankName;
+    private String status;
 
     @ManyToOne
     @JoinColumn(name = "account_type_id", nullable = false)
@@ -29,6 +32,13 @@ public class Card {
     @JoinColumn(name = "member_id", nullable = false) // Member associated with card
     private Member member;  // This links the card to a specific member
 
+    @PrePersist
+    protected void onCreate() {
+        if (status == null) {
+            this.status = "PENDING";
+        }
+    }
+    
     // Getters and setters remain as they were
     public int getId() {
         return id;
@@ -93,4 +103,13 @@ public class Card {
     public void setMember(Member member) {
         this.member = member;
     }
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+    
 }

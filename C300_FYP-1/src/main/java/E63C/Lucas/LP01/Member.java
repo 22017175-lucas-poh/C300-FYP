@@ -36,11 +36,11 @@ public class Member {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int id;
 	@NotEmpty(message="Member name cannot be empty")
-	@Size(min=5,max=50,message="Member name length must be between 5 and 50 characters!")
+	@Size(min=4,max=50,message="Member name length must be between 5 and 50 characters!")
 	private String name;
 	
 	@NotEmpty(message="Member username cannot be empty")
-	@Size(min=5,max=75,message="Member username length must be between 5 and 75 characters!")
+	@Size(min=4,max=75,message="Member username length must be between 5 and 75 characters!")
 	private String username;
 	
 	@NotEmpty(message="Member password cannot be empty")

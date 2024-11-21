@@ -22,4 +22,7 @@ public interface CardRepository extends JpaRepository<Card, Integer> {
 
     // Update to use the correct field name "cardNumber"
     List<Card> findByCardNumber(int cardNumber); // Updated method to use cardNumber
+
+    List<Card> findByStatus(String status);
+
 }
