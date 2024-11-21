@@ -5,12 +5,5 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ConsultationRepository extends JpaRepository<Consultation, Integer> {
-	List<Consultation> findById(int id);
-
-	//List<Consultation> findAll();
-
-	/**
-	 * @param consultation
-	 */
-	//void save(Consultation consultation);
+    List<Consultation> findByMember(Member member);
 }

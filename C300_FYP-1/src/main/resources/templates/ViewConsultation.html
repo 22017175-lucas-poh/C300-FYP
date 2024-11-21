@@ -35,33 +35,29 @@
         <h1>View Consultations</h1>
         <a href="/consultations/book" class="btn btn-primary mb-3">Book Consultation</a>
 
-        <table class="table table-bordered">
-            <thead>
-                <tr> 	
-                    
-                    <th>Member ID</th>              
-                    <th>Date</th>
-                    
-                    <th>Consultant Name</th>
-                    <th>Action</th>
-                </tr> 	
-            </thead>
-            <tbody>
-                <th:block th:each="consultation : ${listConsultations}">
-                    <tr>                        
-                        <td th:text="${consultation.member.id}"></td>
-                        <td th:text="${consultation.consultationDate}"></td>                       
-                        <td th:text="${consultation.consultantName}"></td>
-                        <td>
-                            <a th:href="@{/consultations/edit/{id}(id=${consultation.id})}"
-                                class="text-primary">Edit</a> | 
-                            <a th:href="@{/consultations/delete/{id}(id=${consultation.id})}"
-                                class="text-danger" onclick="return confirmDelete();">Delete</a>
-                        </td>
-                    </tr>
-                </th:block>
-            </tbody>
-        </table>
+       <table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Member Name</th>              
+            <th>Consultation Date</th>
+            <th>Consultant Name</th>
+            <th>Action</th>
+        </tr> 	
+    </thead>
+    <tbody>
+        <th:block th:each="consultation : ${listConsultations}">
+            <tr>
+                <td th:text="${consultation.member.name}"></td>
+                <td th:text="${consultation.consultationDate}"></td>                       
+                <td th:text="${consultation.consultantName}"></td>
+                <td>
+                    <a th:href="@{/consultations/edit/{id}(id=${consultation.id})}" class="text-primary">Edit</a> | 
+                    <a th:href="@{/consultations/delete/{id}(id=${consultation.id})}" class="text-danger" onclick="return confirmDelete();">Delete</a>
+                </td>
+            </tr>
+        </th:block>
+    </tbody>
+</table>
     </div>
 </body>
 </html>

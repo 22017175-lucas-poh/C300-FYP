@@ -11,7 +11,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+
+import E63C.Lucas.LP01.Card.CardStatus;
 
 @Controller
 public class CardController {
@@ -97,6 +100,38 @@ public class CardController {
 
         return "redirect:/Card";
     }
+    @GetMapping("/Admin/Cards")
+    public String viewAllCards(Model model) {
+        // Fetch all cards in the system (admin can view all cards)
+        List<Card> allCards = cardRepository.findAll();
+
+        // Add the list of cards to the model to be rendered in the admin's view
+        model.addAttribute("listCard", allCards);
+
+        return "AdminViewCards";  // Return the page for viewing all cards by the admin
+    }
+
+    @PostMapping("/Admin/Cards/Approve/{id}")
+    public String approveCard(@PathVariable("id") Integer  cardId) {
+        Card card = cardRepository.findById(cardId).orElse(null);
+        if (card != null) {
+            card.setStatus(CardStatus.APPROVED); // Set status using enum
+            cardRepository.save(card);
+        }
+        return "redirect:/Admin/Cards";
+    }
+
+    @PostMapping("/Admin/Cards/Reject/{id}")
+    public String rejectCard(@PathVariable("id") Integer  cardId) {
+        Card card = cardRepository.findById(cardId).orElse(null);
+        if (card != null) {
+            card.setStatus(CardStatus.REJECTED); // Set status using enum
+            cardRepository.save(card);
+        }
+        return "redirect:/Admin/Cards";
+    }
+
+
 
     public void sendEmail(String to, String subject, String body) {
         try {

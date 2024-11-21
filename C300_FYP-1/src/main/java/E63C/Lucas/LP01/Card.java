@@ -3,6 +3,8 @@ package E63C.Lucas.LP01;
 import java.sql.Date;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -15,14 +17,16 @@ public class Card {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    
-    private int cardNumber; // Reverted back to the original field name (cardNumber)
+
+    private int cardNumber;
 
     private String cardName;
     private int CVV;
     private Date expiryDate;
     private String bankName;
-    private String status;
+
+    @Enumerated(EnumType.STRING) // Store enum as string in the database
+    private CardStatus status;
 
     @ManyToOne
     @JoinColumn(name = "account_type_id", nullable = false)
@@ -30,15 +34,15 @@ public class Card {
 
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false) // Member associated with card
-    private Member member;  // This links the card to a specific member
+    private Member member; // This links the card to a specific member
 
     @PrePersist
     protected void onCreate() {
         if (status == null) {
-            this.status = "PENDING";
+            this.status = CardStatus.PENDING; // Default value
         }
     }
-    
+
     // Getters and setters remain as they were
     public int getId() {
         return id;
@@ -48,12 +52,12 @@ public class Card {
         this.id = id;
     }
 
-    public int getCardNumber() { 
-        return cardNumber; // The original getter for cardNumber
+    public int getCardNumber() {
+        return cardNumber;
     }
 
-    public void setCardNumber(int cardNumber) { 
-        this.cardNumber = cardNumber; // The original setter for cardNumber
+    public void setCardNumber(int cardNumber) {
+        this.cardNumber = cardNumber;
     }
 
     public String getCardName() {
@@ -104,12 +108,18 @@ public class Card {
         this.member = member;
     }
 
-	public String getStatus() {
-		return status;
-	}
+    public CardStatus getStatus() {
+        return status;
+    }
 
-	public void setStatus(String status) {
-		this.status = status;
-	}
-    
+    public void setStatus(CardStatus status) {
+        this.status = status;
+    }
+
+    // Enum for card status
+    public enum CardStatus {
+        PENDING,
+        APPROVED,
+        REJECTED;
+    }
 }

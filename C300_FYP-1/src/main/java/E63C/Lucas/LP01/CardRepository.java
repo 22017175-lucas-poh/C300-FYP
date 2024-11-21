@@ -14,15 +14,14 @@
 package E63C.Lucas.LP01;
 
 import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CardRepository extends JpaRepository<Card, Integer> {
-    // Fetch cards by member
     List<Card> findByMember(Member member);
 
-    // Update to use the correct field name "cardNumber"
-    List<Card> findByCardNumber(int cardNumber); // Updated method to use cardNumber
+    List<Card> findByCardNumber(int cardNumber);
 
-    List<Card> findByStatus(String status);
-
+    // Update the method to use CardStatus
+    List<Card> findByStatus(Card.CardStatus status); // Use CardStatus enum directly
 }

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>RP Digital Bank - View Card</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+	function confirmAction(action) {
+		return confirm("Are you sure you want to " + action + " this card?");
+	}
+</script>
+
+<style>
+/* Style for the Action column links */
+table.table a {
+	color: #007bff; /* Set link color to blue */
+	text-decoration: none; /* Remove underline */
+}
+
+table.table a:hover {
+	color: #0056b3; /* Darker blue on hover */
+	text-decoration: underline; /* Underline on hover */
+}
+</style>
+</head>
+<body>
+	<div class="container">
+		<div th:replace="fragments/header"></div>
+
+		<h1>View Cards (Admin)</h1>
+		<table class="table table-bordered">
+			<thead>
+				<tr>
+					<th>Account Type</th>
+					<th>Card Number</th>
+					<th>CVC/CVV</th>
+					<th>Expiry Date</th>
+					<th>Bank Name</th>
+					<th>Status</th>
+					<th>Action</th>
+				</tr>
+			</thead>
+			<tbody>
+				<th:block th:each="Card : ${listCard}">
+					<tr>
+						<td th:text="${Card.account_type.name}"></td>
+						<td th:text="${Card.cardNumber}"></td>
+						<td th:text="${Card.CVV}"></td>
+						<td th:text="${Card.expiryDate}"></td>
+						<td th:text="${Card.bankName}"></td>
+						<td th:text="${Card.status}"></td>
+
+						<td>
+							<!-- Approve Action -->
+							<form th:action="@{/Admin/Cards/Approve/{id}(id=${Card.id})}"
+								method="post" style="display: inline;">
+								<a href="#" class="text-success"
+									onclick="if(confirmAction('approve')) this.closest('form').submit(); return false;">Approve</a>
+							</form> <span>|</span> <!-- Reject Action -->
+							<form th:action="@{/Admin/Cards/Reject/{id}(id=${Card.id})}"
+								method="post" style="display: inline;">
+								<a href="#" class="text-danger"
+									onclick="if(confirmAction('reject')) this.closest('form').submit(); return false;">Reject</a>
+							</form>
+						</td>
+
+
+					</tr>
+				</th:block>
+			</tbody>
+		</table>
+	</div>
+</body>
+</html>
