@@ -100,7 +100,7 @@ public class CardController {
 
         return "redirect:/Card";
     }
-    @GetMapping("/Admin/Cards")
+    @GetMapping("/Admin/Card")
     public String viewAllCards(Model model) {
         // Fetch all cards in the system (admin can view all cards)
         List<Card> allCards = cardRepository.findAll();
@@ -111,25 +111,28 @@ public class CardController {
         return "AdminViewCards";  // Return the page for viewing all cards by the admin
     }
 
-    @PostMapping("/Admin/Cards/Approve/{id}")
-    public String approveCard(@PathVariable("id") Integer  cardId) {
+    @PostMapping("/Admin/Card/Approve/{id}")
+    public String approveCard(@PathVariable("id") Integer cardId) {
         Card card = cardRepository.findById(cardId).orElse(null);
-        if (card != null) {
-            card.setStatus(CardStatus.APPROVED); // Set status using enum
-            cardRepository.save(card);
+        if (card != null && card.getStatus() == CardStatus.PENDING) {
+            card.setStatus(CardStatus.APPROVED); // Update status to APPROVED
+            cardRepository.save(card); // Save the updated card
         }
-        return "redirect:/Admin/Cards";
+        return "redirect:/Admin/Cards"; // Redirect to view the updated list
     }
 
-    @PostMapping("/Admin/Cards/Reject/{id}")
-    public String rejectCard(@PathVariable("id") Integer  cardId) {
+    @PostMapping("/Admin/Card/Reject/{id}")
+    public String rejectCard(@PathVariable("id") Integer cardId) {
         Card card = cardRepository.findById(cardId).orElse(null);
-        if (card != null) {
-            card.setStatus(CardStatus.REJECTED); // Set status using enum
-            cardRepository.save(card);
+        if (card != null && card.getStatus() == CardStatus.PENDING) {
+            card.setStatus(CardStatus.REJECTED); // Update status to REJECTED
+            cardRepository.save(card); // Save the updated card
         }
-        return "redirect:/Admin/Cards";
+        return "redirect:/Admin/Cards"; // Redirect to view the updated list
     }
+
+
+
 
 
 
@@ -139,7 +142,7 @@ public class CardController {
             msg.setTo(to);
             msg.setSubject(subject);
             msg.setText(body);
-            msg.setFrom("lucaspoh7@gmail.com");
+            msg.setFrom("musashibestgirl990@gmail");
 
             javaMailSender.send(msg);
             System.out.println("Email sent successfully to: " + to);

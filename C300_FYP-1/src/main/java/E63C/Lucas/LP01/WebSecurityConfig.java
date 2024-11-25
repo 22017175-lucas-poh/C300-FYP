@@ -33,7 +33,8 @@ public class WebSecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
-				.requestMatchers("/Card/delete/*", "/Account_type", "/Account_type/add", "/Account_type/edit/*")
+				.requestMatchers("/Card/delete/*", "/Account_type", "/Account_type/add", "/Account_type/edit/*","/Admin/Card","/Admin/Card/Approve/*"
+						,"/Admin/Card/Reject/*")
 				.hasRole("ADMIN").requestMatchers("/").permitAll() // Home page is visible without logging in
 				.requestMatchers("/bootstrap/*/*").permitAll() // for static resources, visible to all
 				.requestMatchers("/images/*").permitAll() // for static resources, visible to all

@@ -152,10 +152,9 @@ nav .navbar-brand img {
 <body>
 
     <div class="off-screen-menu">
-        <a href="#">Home</a>
+        <a href="/">Home</a>
         <a href="/Card">Manage Card</a>
-        <!--will need to change Card to match the user Id so that user is only able to view own Card  -->
-        <a href="#">Book Consultation</a>
+        <a href="/consultations">Book Consultation</a>
 
         <a sec:authorize="!isAuthenticated()" href="/login">Login</a>
 
@@ -165,7 +164,7 @@ nav .navbar-brand img {
     </div>
 
     <nav>
-        <a class="navbar-brand" href="#">
+        <a class="navbar-brand" href="/">
             <img src="/images/Rp_logo.png" alt="Logo">
         </a>
 

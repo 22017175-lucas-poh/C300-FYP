@@ -5,9 +5,28 @@
 <title>Rp Digital Bank - Add Card</title>
 <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
 <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>
+    // JavaScript for Bootstrap's Validation
+    document.addEventListener('DOMContentLoaded', () => {
+        const forms = document.querySelectorAll('.needs-validation');
+
+        // Loop over forms and prevent submission if invalid
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    });
+</script>
 </head>
 <body>
     <div class="container">
+        <div th:replace="fragments/header"></div>
+    
         <h1>Add new Card</h1>
 
         <!-- Display Duplicate Card Error -->
@@ -24,7 +43,7 @@
                 <select id="account_type" class="form-select" th:field="*{account_type}" required>
                     <option value="">Choose one</option>
                     <option th:each="account : ${accountTypeList}"
-                        th:value="${account.id}" th:text="${account.name}"></option>
+                            th:value="${account.id}" th:text="${account.name}"></option>
                 </select>
                 <div class="invalid-feedback">Please select an Account Type</div>
             </div>
@@ -33,7 +52,8 @@
             <div class="mb-3 col-5">
                 <label for="cardNumber" class="form-label">Card Number</label>
                 <input id="cardNumber" type="text" class="form-control" 
-                       th:field="*{cardNumber}" required pattern="^\d{9}$" title="Card number must be exactly 9 digits"/>
+                       th:field="*{cardNumber}" required pattern="^\d{9}$" 
+                       title="Card number must be exactly 9 digits"/>
                 <div class="invalid-feedback">Please enter a valid 9-digit Card Number</div>
                 <p class="text-danger" th:if="${#fields.hasErrors('cardNumber')}" th:errors="*{cardNumber}"></p>
             </div>
@@ -41,7 +61,8 @@
             <!-- CVV -->
             <div class="mb-3 col-5">
                 <label for="CVV" class="form-label">CVV/CVC</label>
-                <input id="CVV" type="text" class="form-control" th:field="*{CVV}" required pattern="^\d{3}$" title="CVV must be exactly 3 digits"/>
+                <input id="CVV" type="text" class="form-control" th:field="*{CVV}" 
+                       required pattern="^\d{3}$" title="CVV must be exactly 3 digits"/>
                 <div class="invalid-feedback">Please enter a valid 3-digit CVV</div>
                 <p class="text-danger" th:if="${#fields.hasErrors('CVV')}" th:errors="*{CVV}"></p>
             </div>
@@ -49,24 +70,27 @@
             <!-- Expiry Date -->
             <div class="mb-3 col-5">
                 <label for="ExpiryDate" class="form-label">Expiry Date</label>
-                <input id="ExpiryDate" type="date" class="form-control" th:field="*{ExpiryDate}" required />
+                <input id="ExpiryDate" type="date" class="form-control" 
+                       th:field="*{ExpiryDate}" required />
                 <div class="invalid-feedback">Please enter a valid Expiry Date</div>
                 <p class="text-danger" th:if="${#fields.hasErrors('ExpiryDate')}" th:errors="*{ExpiryDate}"></p>
             </div>
 
-            <!-- Cardholders Name -->
+            <!-- Cardholder's Name -->
             <div class="mb-3 col-5">
                 <label for="CardName" class="form-label">Cardholder's Name</label>
-                <input id="CardName" type="text" class="form-control" th:field="*{CardName}" required minlength="5" title="Cardholder's name must be at least 5 words"/>
-                <div class="invalid-feedback">Please enter a valid Cardholder's Name with at least 5 words</div>
+                <input id="CardName" type="text" class="form-control" th:field="*{CardName}" 
+                       required minlength="5" title="Cardholder's name must be at least 5 characters"/>
+                <div class="invalid-feedback">Please enter a valid Cardholder's Name with at least 5 characters</div>
                 <p class="text-danger" th:if="${#fields.hasErrors('CardName')}" th:errors="*{CardName}"></p>
             </div>
 
             <!-- Bank Name -->
             <div class="mb-3 col-5">
                 <label for="BankName" class="form-label">Bank Name</label>
-                <input id="BankName" type="text" class="form-control" th:field="*{bankName}" required minlength="5" title="Bank Name must be at least 5 words"/>
-                <div class="invalid-feedback">Please enter a valid Bank Name with at least 5 words</div>
+                <input id="BankName" type="text" class="form-control" th:field="*{bankName}" 
+                       required minlength="5" title="Bank Name must be at least 5 characters"/>
+                <div class="invalid-feedback">Please enter a valid Bank Name with at least 5 characters</div>
                 <p class="text-danger" th:if="${#fields.hasErrors('bankName')}" th:errors="*{bankName}"></p>
             </div>
 
