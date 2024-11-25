@@ -34,9 +34,9 @@
         <div th:replace="fragments/header"></div>
 
         <h1>View Cards</h1>
-        <table class="table table-bordered">
-            <a href="/Card/add" class="btn btn-primary">Apply for Card</a>
+        <a href="/Card/add" class="btn btn-primary">Apply for Card</a>
 
+        <table class="table table-bordered">
             <thead>
                 <tr>
                     <th>Account Type</th>
@@ -48,25 +48,25 @@
                 </tr>
             </thead>
             <tbody>
+                <!-- Iterate over the list of cards and only show the approved ones -->
                 <th:block th:each="Card : ${listCard}">
-                    <tr>
+                    <tr th:if="${Card.status.name() == 'APPROVED'}">
                         <td th:text="${Card.account_type.name}"></td>
                         <td th:text="${Card.cardNumber}"></td>
                         <td th:text="${Card.CVV}"></td>
                         <td th:text="${Card.expiryDate}"></td>
                         <td th:text="${Card.bankName}"></td>
 
-                        <td><a th:href="@{/Card/edit/{id}(id=${Card.cardNumber})}"
-                            class="text-primary">Edit</a> | <a
-                            th:href="@{/Card/delete/{id}(id=${Card.cardNumber})}"
-                            class="text-primary" onclick="return confirmDelete();">Delete</a>
+                        <td>
+                            <a th:href="@{/Card/edit/{id}(id=${Card.cardNumber})}"
+                               class="text-primary">Edit</a> | 
+                            <a th:href="@{/Card/delete/{id}(id=${Card.cardNumber})}"
+                               class="text-primary" onclick="return confirmDelete();">Delete</a>
                         </td>
-
                     </tr>
                 </th:block>
             </tbody>
         </table>
-  
     </div>
 </body>
 </html>

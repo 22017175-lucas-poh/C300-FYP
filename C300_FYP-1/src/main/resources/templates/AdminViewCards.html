@@ -58,12 +58,12 @@ table.table a:hover {
 						<td>
     <!-- Show Approve and Reject if status is PENDING -->
     <span th:if="${Card.status.name() == 'PENDING'}">
-        <form th:action="@{/Admin/Cards/Approve/{id}(id=${Card.id})}" method="post" style="display: inline;">
+        <form th:action="@{/Admin/Card/Approve/{id}(id=${Card.id})}" method="post" style="display: inline;">
             <a href="#" class="text-success"
                onclick="if(confirmAction('approve')) this.closest('form').submit(); return false;">Approve</a>
         </form>
         <span>|</span>
-        <form th:action="@{/Admin/Cards/Reject/{id}(id=${Card.id})}" method="post" style="display: inline;">
+        <form th:action="@{/Admin/Card/Reject/{id}(id=${Card.id})}" method="post" style="display: inline;">
             <a href="#" class="text-danger"
                onclick="if(confirmAction('reject')) this.closest('form').submit(); return false;">Reject</a>
         </form>
@@ -71,9 +71,9 @@ table.table a:hover {
 
     <!-- Show Edit and Delete if status is APPROVED or REJECTED -->
     <span th:if="${Card.status.name() == 'APPROVED' or Card.status.name() == 'REJECTED'}">
-        <a href="@{/Admin/Cards/Edit/{id}(id=${Card.id})}" class="text-warning">Edit</a>
+        <a href="@{/Admin/Card/Edit/{id}(id=${Card.id})}" class="text-warning">Edit</a>
         <span>|</span>
-        <form th:action="@{/Admin/Cards/Delete/{id}(id=${Card.id})}" method="post" style="display: inline;">
+        <form th:action="@{/Admin/Card/Delete/{id}(id=${Card.id})}" method="post" style="display: inline;">
             <a href="#" class="text-danger"
                onclick="if(confirmAction('delete')) this.closest('form').submit(); return false;">Delete</a>
         </form>

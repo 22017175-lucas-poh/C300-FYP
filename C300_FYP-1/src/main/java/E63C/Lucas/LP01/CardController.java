@@ -118,7 +118,7 @@ public class CardController {
             card.setStatus(CardStatus.APPROVED); // Update status to APPROVED
             cardRepository.save(card); // Save the updated card
         }
-        return "redirect:/Admin/Cards"; // Redirect to view the updated list
+        return "redirect:/Admin/Card"; // Redirect to view the updated list
     }
 
     @PostMapping("/Admin/Card/Reject/{id}")
@@ -128,7 +128,7 @@ public class CardController {
             card.setStatus(CardStatus.REJECTED); // Update status to REJECTED
             cardRepository.save(card); // Save the updated card
         }
-        return "redirect:/Admin/Cards"; // Redirect to view the updated list
+        return "redirect:/Admin/Card"; // Redirect to view the updated list
     }
 
 
