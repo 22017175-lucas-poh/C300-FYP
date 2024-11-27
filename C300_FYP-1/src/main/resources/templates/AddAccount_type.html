@@ -12,8 +12,8 @@
 </head>
 <body>
     <div class="container">
-<!--         <div th:replace="fragments/header"></div>
- -->        <h1>Add new Account Type</h1>
+       <div th:replace="fragments/header"></div>
+        <h1>Add new Account Type</h1>
         <form th:action="@{/Account_type/save}" class="needs-validation" action="/Account_type/save" method="post" th:object="${account_type}" novalidate>
             <div class="mb-3 col-5">
                 <label for="category_name" class="form-label">Account Type</label>

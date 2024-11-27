@@ -9,7 +9,7 @@
         function confirmDelete() {
             return confirm("Are you sure you want to delete this category?");
         }
-    </script>
+</script>
 <style>
 /* Custom styling for links to make them visible */
 a {
@@ -40,12 +40,14 @@ a:hover {
 					<tr>
 						<td th:text="${account_type.id}"></td>
 						<td th:text="${account_type.name}"></td>
-						<td><a
-							th:href="@{/Account_type/edit/{id}(id=${account_type.id})}"
-							class="text-primary">Edit</a> | <a
-							th:href="@{/Account_type/delete/{id}(id=${account_type.id})}"
-							class="text-primary" onclick="return confirmDelete()">Delete</a>
-
+						<td>
+							<a th:href="@{/Account_type/edit/{id}(id=${account_type.id})}" class="text-primary">Edit</a> | 
+							
+							<!-- Delete link turned into a form for POST -->
+							<form th:action="@{/Account_type/delete/{id}(id=${account_type.id})}" method="post" style="display:inline;" onsubmit="return confirmDelete()">
+								<input type="hidden" name="_csrf" th:value="${_csrf.token}" /> <!-- Add CSRF token for Spring Security -->
+								<button type="submit" class="btn btn-link text-danger" style="text-decoration:none; padding: 0;">Delete</button>
+							</form>
 						</td>
 					</tr>
 				</th:block>

@@ -100,7 +100,7 @@ public class Account_type_controller {
 		return "redirect:/Account_type"; // Adjust redirect as per your application's design
 	}
 
-	@GetMapping("/Account_type/delete/{id}")
+	@PostMapping("/Account_type/delete/{id}")
 	public String deleteAccount_type(@PathVariable("id") Integer id) {
 		accountrepository.deleteById(id);
 

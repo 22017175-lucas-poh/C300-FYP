@@ -1,6 +1,8 @@
 package E63C.Lucas.LP01;
 
+import java.util.Calendar;
 import java.util.List;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
@@ -19,135 +21,209 @@ import E63C.Lucas.LP01.Card.CardStatus;
 @Controller
 public class CardController {
 
-    @Autowired
-    private CardRepository cardRepository;
+	@Autowired
+	private CardRepository cardRepository;
 
-    @Autowired
-    private PendingCardRepository pendingCardRepository;
+//	@Autowired
+//	private PendingCardRepository pendingCardRepository;
 
-    @Autowired
-    private AccountRepository accountRepository;
+	@Autowired
+	private AccountRepository accountRepository;
 
-    @Autowired
-    private JavaMailSender javaMailSender;
-    @Autowired
-    private MemberRepository memberRepository;
+	@Autowired
+	private JavaMailSender javaMailSender;
+	@Autowired
+	private MemberRepository memberRepository;
 
-    // This method fetches only the cards of the currently logged-in member
-    @GetMapping("/Card")
-    public String viewCard(Model model) {
-        // Get the current logged-in user from the authentication context
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName(); // Assuming the user is identified by 'username'
+	// This method fetches only the cards of the currently logged-in member
+	@GetMapping("/Card")
+	public String viewCard(Model model) {
+		// Get the current logged-in user from the authentication context
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String username = authentication.getName(); // Assuming the user is identified by 'username'
 
-        // Fetch the member based on the username (from the Member repository)
-        Member loggedInMember = memberRepository.findByUsername(username);
+		// Fetch the member based on the username (from the Member repository)
+		Member loggedInMember = memberRepository.findByUsername(username);
 
-        // Fetch the cards associated with the logged-in member
-        List<Card> userCards = cardRepository.findByMember(loggedInMember);
+		// Fetch the cards associated with the logged-in member
+		List<Card> userCards = cardRepository.findByMember(loggedInMember);
 
-        model.addAttribute("listCard", userCards);
-        return "ViewCard";  // A page that shows cards
-    }
+		model.addAttribute("listCard", userCards);
+		return "ViewCard"; // A page that shows cards
+	}
 
-    @GetMapping("/Card/add")
-    public String addCard(Model model) {
-        model.addAttribute("card", new Card());
-        List<Account_type> accountTypeList = accountRepository.findAll();
-        model.addAttribute("accountTypeList", accountTypeList);
-        return "AddCard";  // A page for adding a new card
-    }
+	@GetMapping("/Card/add")
+	public String addCard(Model model) {
+		model.addAttribute("card", new Card());
+		List<Account_type> accountTypeList = accountRepository.findAll();
+		model.addAttribute("accountTypeList", accountTypeList);
+		return "AddCard"; // A page for adding a new card
+	}
 
-    @PostMapping("/Card/save")
-    public String saveCard(@ModelAttribute Card card, Model model) {
-        // Get the current logged-in member
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName(); // Assuming the user is identified by 'username'
+	@PostMapping("/Card/save")
+	public String saveCard(@ModelAttribute Card card, Model model) {
+	    // Constants for Card Number and CVV Generation
+	    final int CARD_NUMBER_MIN = 100_000_000;
+	    final int CARD_NUMBER_MAX = 999_999_999;
+	    final int CVV_MIN = 100;
+	    final int CVV_MAX = 999;
 
-        // Fetch the member based on the username
-        Member loggedInMember = memberRepository.findByUsername(username);
+	    Random random = new Random();
 
-        // Set the member to the card
-        card.setMember(loggedInMember);
+	    // Get the current logged-in member
+	    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+	    String username = authentication.getName();
 
-        // Check for duplicate card number
-        List<Card> existingCardnumber = cardRepository.findByCardNumber(card.getCardNumber());
+	    // Fetch the member based on the username
+	    Member loggedInMember = memberRepository.findByUsername(username);
 
-        if (!existingCardnumber.isEmpty()) {
-            model.addAttribute("duplicateCard_Error", true);
-            List<Account_type> accountTypeList = accountRepository.findAll();
-            model.addAttribute("accountTypeList", accountTypeList);
-            model.addAttribute("card", card);
-            return "AddCard";  // Return to add card page if there is a duplicate
-        }
+	    // Set the member to the card
+	    card.setMember(loggedInMember);
 
-        // Save the card temporarily
-        pendingCardRepository.save(card);
-        System.out.println("Card saved temporarily: " + card.getCardNumber());
+	    // Generate a random card number if not provided
+	    if (card.getCardNumber() == 0) {
+	        card.setCardNumber(CARD_NUMBER_MIN + random.nextInt(CARD_NUMBER_MAX - CARD_NUMBER_MIN + 1));
+	    }
 
-        // Send email to admin (as before)
-        String adminEmail = "lucaspoh7@gmail.com";  // Replace with your admin email
-        String subject = "Card Application Received";
-        String body = "A new card has been applied with the following details:\n" +
-                      "Card Number: " + card.getCardNumber() + "\n" +
-                      "Account Type: " + card.getAccount_type().getName() + "\n" +
-                      "CVV/CVC: " + card.getCVV() + "\n" +
-                      "Expiry Date: " + card.getExpiryDate() + "\n" +
-                      "Bank Name: " + card.getBankName() + "\n\n" +
-                      "Please review this application.";
+	    // Generate a random CVV if not provided
+	    if (card.getCVV() == 0) {
+	        card.setCVV(CVV_MIN + random.nextInt(CVV_MAX - CVV_MIN + 1));
+	    }
 
-        sendEmail(adminEmail, subject, body);
+	    // Set expiry date to 4 years from now if not provided
+	    if (card.getExpiryDate() == null) {
+	        Calendar calendar = Calendar.getInstance();
+	        calendar.add(Calendar.YEAR, 4); // Add 4 years to the current date
+	        java.util.Date utilDate = calendar.getTime(); // Get java.util.Date
+	        java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime()); // Convert to java.sql.Date
+	        card.setExpiryDate(sqlDate); // Set the expiry date
+	    }
 
-        return "redirect:/Card";
-    }
-    @GetMapping("/Admin/Card")
-    public String viewAllCards(Model model) {
-        // Fetch all cards in the system (admin can view all cards)
-        List<Card> allCards = cardRepository.findAll();
+	    // Set bank name to "RP Digital Bank" if not provided
+	    if (card.getBankName() == null || card.getBankName().isEmpty()) {
+	        card.setBankName("RP Digital Bank");
+	    }
 
-        // Add the list of cards to the model to be rendered in the admin's view
-        model.addAttribute("listCard", allCards);
+	    // Check for duplicate card number
+	    List<Card> existingCardNumbers = cardRepository.findByCardNumber(card.getCardNumber());
+	    if (!existingCardNumbers.isEmpty()) {
+	        model.addAttribute("duplicateCard_Error", true);
+	        List<Account_type> accountTypeList = accountRepository.findAll();
+	        model.addAttribute("accountTypeList", accountTypeList);
+	        model.addAttribute("card", card);
+	        return "AddCard"; // Return to add card page if duplicate is found
+	    }
 
-        return "AdminViewCards";  // Return the page for viewing all cards by the admin
-    }
+	    // Save the card to the database
+	    cardRepository.save(card);
 
-    @PostMapping("/Admin/Card/Approve/{id}")
-    public String approveCard(@PathVariable("id") Integer cardId) {
-        Card card = cardRepository.findById(cardId).orElse(null);
-        if (card != null && card.getStatus() == CardStatus.PENDING) {
-            card.setStatus(CardStatus.APPROVED); // Update status to APPROVED
-            cardRepository.save(card); // Save the updated card
-        }
-        return "redirect:/Admin/Card"; // Redirect to view the updated list
-    }
+	    // Send email to admin
+	    String adminEmail = "lucaspoh7@gmail.com";
+	    String subject = "Card Application Received";
+	    String body = "A new card has been applied with the following details:\n" +
+	                  "Card Number: " + card.getCardNumber() + "\n" +
+	                  "Account Type: " + card.getAccount_type().getName() + "\n" +
+	                  "CVV/CVC: " + card.getCVV() + "\n" +
+	                  "Expiry Date: " + card.getExpiryDate() + "\n" +
+	                  "Bank Name: " + card.getBankName() + "\n\n" +
+	                  "Please review this application.";
 
-    @PostMapping("/Admin/Card/Reject/{id}")
-    public String rejectCard(@PathVariable("id") Integer cardId) {
-        Card card = cardRepository.findById(cardId).orElse(null);
-        if (card != null && card.getStatus() == CardStatus.PENDING) {
-            card.setStatus(CardStatus.REJECTED); // Update status to REJECTED
-            cardRepository.save(card); // Save the updated card
-        }
-        return "redirect:/Admin/Card"; // Redirect to view the updated list
-    }
+	    sendEmail(adminEmail, subject, body);
+
+	    // Redirect to the success page
+	    return "redirect:/Card";
+	}
+
+	@GetMapping("/Admin/Card")
+	public String viewAllCards(Model model) {
+		// Fetch all cards in the system (admin can view all cards)
+		List<Card> allCards = cardRepository.findAll();
+
+		// Add the list of cards to the model to be rendered in the admin's view
+		
+		model.addAttribute("listCard", allCards);
+
+		return "AdminViewCards"; // Return the page for viewing all cards by the admin
+	}
+
+	@PostMapping("/Admin/Card/Approve/{id}")
+	public String approveCard(@PathVariable("id") Integer cardId) {
+		Card card = cardRepository.findById(cardId).orElse(null);
+		if (card != null && card.getStatus() == CardStatus.PENDING) {
+			card.setStatus(CardStatus.APPROVED); // Update status to APPROVED
+			cardRepository.save(card); // Save the updated card
+		}
+		return "redirect:/Admin/Card"; // Redirect to view the updated list
+	}
+
+	@PostMapping("/Admin/Card/Reject/{id}")
+	public String rejectCard(@PathVariable("id") Integer cardId) {
+		Card card = cardRepository.findById(cardId).orElse(null);
+		if (card != null && card.getStatus() == CardStatus.PENDING) {
+			card.setStatus(CardStatus.REJECTED); // Update status to REJECTED
+			cardRepository.save(card); // Save the updated card
+		}
+		return "redirect:/Admin/Card"; // Redirect to view the updated list
+	}
+	
+
+	@GetMapping("/Admin/Card/Edit/{id}")
+	public String editCard(@PathVariable("id") int id, Model model) {
+	    // Fetch the card using the Integer type id
+	    Card card = cardRepository.findById(id).orElse(null);
+	    if (card == null) {
+	        return "redirect:/Admin/Card"; // Redirect if card not found
+	    }
+
+	    // Add the card and account types to the model
+	    List<Account_type> accountTypeList = accountRepository.findAll();
+	    model.addAttribute("card", card);
+	    model.addAttribute("accountTypeList", accountTypeList);
+
+	    return "EditCard"; // Return the edit card page
+	}
+	
+	@PostMapping("/Admin/Card/Edit/{id}")
+	public String SaveUpdatedCard(@PathVariable("id") Integer cardId, @ModelAttribute Card card, Model model) {
+	    Card existingCard = cardRepository.findById(cardId).orElse(null);
+	    
+	    if (existingCard == null) {
+	        model.addAttribute("error", "Card not found.");
+	        return "redirect:/Admin/Card"; // Redirect if card not found
+	    }
+
+	    existingCard.setAccount_type(card.getAccount_type());
+	    existingCard.setCardNumber(card.getCardNumber());
+	    existingCard.setCVV(card.getCVV());
+	    existingCard.setExpiryDate(card.getExpiryDate());
+	    existingCard.setCardName(card.getCardName());
+	    existingCard.setBankName(card.getBankName());
+	    
+	    cardRepository.save(existingCard);
+	    
+	    return "redirect:/Admin/Card"; 
+	}
+	@PostMapping("/Admin/Card/Delete/{id}")
+	public String deleteCard(@PathVariable("id") Integer id){
+		cardRepository.deleteById(id);
+		
+	    return "redirect:/Admin/Card";
+	}
+	
 
 
+	public void sendEmail(String to, String subject, String body) {
+		try {
+			SimpleMailMessage msg = new SimpleMailMessage();
+			msg.setTo(to);
+			msg.setSubject(subject);
+			msg.setText(body);
+			msg.setFrom("musashibestgirl990@gmail");
 
-
-
-
-    public void sendEmail(String to, String subject, String body) {
-        try {
-            SimpleMailMessage msg = new SimpleMailMessage();
-            msg.setTo(to);
-            msg.setSubject(subject);
-            msg.setText(body);
-            msg.setFrom("musashibestgirl990@gmail");
-
-            javaMailSender.send(msg);
-            System.out.println("Email sent successfully to: " + to);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+			javaMailSender.send(msg);
+			System.out.println("Email sent successfully to: " + to);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }

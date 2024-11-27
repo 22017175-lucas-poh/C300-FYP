@@ -50,21 +50,29 @@ public class ConsultationController {
         return "BookConsultation"; // Renders the booking form
     }
     @PostMapping("/consultations/book/save")
-    public String saveBooking(Consultation consultation) {
-        // Get the logged-in user's username
+    public String saveBooking(Consultation consultation, Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
 
-        // Find the logged-in member
         Member loggedInMember = memberRepository.findByUsername(username);
 
         if (loggedInMember != null) {
-            // Associate the consultation with the logged-in member
             consultation.setMember(loggedInMember);
-            consultationRepository.save(consultation);
+            consultation = consultationRepository.save(consultation);
+
+            // Pass the saved consultation to the confirmation view
+            model.addAttribute("consultation", consultation);
+            return "Confirmation";
         }
 
         return "redirect:/consultations";
+    }
+    @GetMapping("/Admin/Consultations")
+    public String viewAllConsultations(Model model) {
+        // Fetch all consultations
+        List<Consultation> listAllConsultations = consultationRepository.findAll();
+        model.addAttribute("listAllConsultations", listAllConsultations);
+        return "AdminViewConsultations";
     }
 }
     
