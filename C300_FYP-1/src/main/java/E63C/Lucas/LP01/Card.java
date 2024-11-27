@@ -24,6 +24,7 @@ public class Card {
     private int CVV;
     private Date expiryDate;
     private String bankName;
+    private int balance;
 
     @Enumerated(EnumType.STRING) // Store enum as string in the database
     private CardStatus status;
