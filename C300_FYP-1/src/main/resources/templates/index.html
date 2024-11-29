@@ -1,23 +1,114 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RP Digital Bank - Home</title>
 
-<title>Rp Digital Bank - Home</title>
-
-<link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
-<script src="/bootstrap/js/bootstrap.min.js"></script>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+    <script src="/bootstrap/js/bootstrap.min.js"></script>
+    
+    <!-- Custom Styles -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .hero-section {
+            background: linear-gradient(to right, #4e73df, #1cc88a);
+            color: white;
+            padding: 50px 20px;
+            text-align: center;
+        }
+        .hero-section h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        .features {
+            padding: 40px 20px;
+        }
+        .feature-card {
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        .cta-section {
+            background-color: #1cc88a;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .cta-section h2 {
+            margin-bottom: 20px;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-	<div class="container">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div th:replace="fragments/header"></div>
 
-				<div th:replace="fragments/header"></div>
-		
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <h1>Welcome to RP Digital Bank!</h1>
+            <p>Fast. Secure. Reliable. Manage your finances with confidence.</p>
+            <a href="/login" class="btn btn-light btn-lg">Get Started</a>
+        </div>
 
-		<h1>Welcome to Rp Digital Bank!</h1>
+        <!-- Features Section -->
+        <div class="features container my-5">
+            <div class="row text-center">
+                <div class="col-md-4">
+                    <div class="card feature-card p-4">
+                        <img src="images/easybank.png" alt="Easy Banking" class="card-img-top mx-auto" style="width: 50px;">
+                        <div class="card-body">
+                            <h5 class="card-title">Easy Banking</h5>
+                            <p class="card-text">Access your account anytime, anywhere with our user-friendly platform.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card p-4">
+                        <img src="images/secure.png" alt="Secure Transactions" class="card-img-top mx-auto" style="width: 50px;">
+                        <div class="card-body">
+                            <h5 class="card-title">Secure Transactions</h5>
+                            <p class="card-text">Your security is our priority. Bank with peace of mind.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card p-4">
+                        <img src="images/247support.png" alt="24/7 Support" class="card-img-top mx-auto" style="width: 50px;">
+                        <div class="card-body">
+                            <h5 class="card-title">24/7 Support</h5>
+                            <p class="card-text">Need help? Our support team is here for you anytime.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-		<!-- 			<div th:replace="fragments/footer"></div> -->
+        <!-- Call to Action Section -->
+        <div class="cta-section">
+            <h2>Ready to Take Control of Your Finances?</h2>
+            <a href="/register" class="btn btn-light btn-lg">Open an Account Today</a>
+        </div>
 
-	</div>
+        <!-- Footer -->
+        <footer>
+            <div th:replace="fragments/footer"></div>
+        </footer>
+    </div>
 </body>
 </html>

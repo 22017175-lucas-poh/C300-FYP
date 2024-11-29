@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>RP Digital Bank - Edit Member</title>
+<link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+<script src="/bootstrap/js/bootstrap.js"></script>
+<style>
+.container {
+	background-color: #fff;
+	padding: 20px;
+	border-radius: 10px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	margin-top: 20px;
+}
+</style>
+</head>
+<body>
+	<div class="container">
+		<div th:replace="fragments/header"></div>
+		<main>
+			<h1>Edit Member</h1>
+			<form th:action="@{/Member/edit/{id}(id=${member.id})}"
+				th:object="${member}" method="post" novalidate>
+
+				<div class="mb-3 col-5">
+					<label for="member_name" class="form-label">Member</label> <input
+						id="member_name" class="form-control" type="text"
+						th:field="*{name}">
+				</div>
+				<div class="mb-3 col-5">
+					<label for="member_username" class="form-label">Username</label> <input
+						id="member_username" class="form-control" type="text"
+						th:field="*{username}">
+				</div>
+				<div class="mb-3 col-5">
+					<label for="member_email" class="form-label">Email</label> <input
+						id="member_email" class="form-control" type="text"
+						th:field="*{email}">
+				</div>
+				<div class="mb-3 col-5">
+					<label for="member_password" class="form-label">Password</label> <input
+						id="member_password" class="form-control" type="text"
+						th:field="*{password}">
+				</div>
+				<div class="mb-3 col-5">
+					<label for="member_nric" class="form-label">NRIC</label> <input
+						id="member_nric" class="form-control" type="text"
+						th:field="*{nric}">
+				</div>
+				<div class="mb-3 col-5">
+					<label for="member_role" class="form-label">Role: </label> <select
+						id="member_role" class="form-control" th:field="*{role}">
+						<option value="ROLE_USER">User</option>
+						<option value="ROLE_ADMIN">Admin</option>
+						<option value="ROLE_BO">Back Office</option>
+						<option value="ROLE_FA">Financial Advisors</option>
+					</select>
+				</div>
+
+				<div class="mt-3 mb-5">
+					<input type="submit" value="Update Member">
+				</div>
+			</form>
+		</main>
+		<div th:replace="fragments/footer"></div>
+	</div>
+</body>
+</html>

@@ -21,6 +21,7 @@ public class WebSecurityConfig {
 		return new BCryptPasswordEncoder();
 	}
 
+	
 	@Bean
 	public DaoAuthenticationProvider authenticationProvider() {
 		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -33,9 +34,10 @@ public class WebSecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
-				.requestMatchers("/Card/delete/*", "/Account_type", "/Account_type/add", "/Account_type/edit/*","/Admin/Card","/Admin/Card/Approve/*"
-						,"/Admin/Card/Reject/*")
+				.requestMatchers("/Card/delete/*", "/Account_type", "/Account_type/add", "/Account_type/edit/*")
 				.hasRole("ADMIN").requestMatchers("/").permitAll() // Home page is visible without logging in
+				.requestMatchers("/register").permitAll()
+				.requestMatchers("/forget").permitAll()
 				.requestMatchers("/bootstrap/*/*").permitAll() // for static resources, visible to all
 				.requestMatchers("/images/*").permitAll() // for static resources, visible to all
 				.anyRequest().authenticated())// Any other requests not specified earlier

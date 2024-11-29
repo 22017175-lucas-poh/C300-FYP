@@ -64,14 +64,30 @@
                             </form>
                         </span>
 
-                        <!-- Show Edit and Delete if status is APPROVED or REJECTED -->
-                        <span th:if="${Card.status.name() == 'APPROVED' or Card.status.name() == 'REJECTED'}">
+                        <!-- Show Edit and Delete if status is APPROVED or REJECTED or CANCELLED -->
+                        <span th:if="${Card.status.name() == 'APPROVED' or Card.status.name() == 'REJECTED' or Card.status.name() == 'CANCELLED'}">
                             <a th:href="@{/Admin/Card/Edit/{id}(id=${Card.id})}" class="text-warning">Edit</a>
                             <span>|</span>
                             <form th:action="@{/Admin/Card/Delete/{id}(id=${Card.id})}" method="post" style="display: inline;">
                                 <a href="#" class="text-danger" onclick="if(confirmAction('delete')) this.closest('form').submit(); return false;">Delete</a>
                             </form>
                         </span>
+                        
+                        
+                        <!-- Show Approve and Reject if status is CANCELLED_PENDING -->
+                        
+                        <span th:if="${Card.status.name() == 'CANCELLED_PENDING'}">
+                            <form th:action="@{/Admin/Card/Cancel/Approve/{id}(id=${Card.id})}" method="post" style="display: inline;">
+                                <a href="#" class="text-success" onclick="if(confirmAction('approve')) this.closest('form').submit(); return false;">Approve</a>
+                            </form>
+                            <span>|</span>
+                            <form th:action="@{/Admin/Card/Cancel/Reject/{id}(id=${Card.id})}" method="post" style="display: inline;">
+                                <a href="#" class="text-danger" onclick="if(confirmAction('reject')) this.closest('form').submit(); return false;">Reject</a>
+                            </form>
+                        </span>
+                        
+                        
+                        
                     </td>
 
                 </tr>

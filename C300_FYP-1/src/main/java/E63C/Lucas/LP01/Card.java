@@ -24,7 +24,7 @@ public class Card {
     private int CVV;
     private Date expiryDate;
     private String bankName;
-    private int balance;
+    private double balance;
 
     @Enumerated(EnumType.STRING) // Store enum as string in the database
     private CardStatus status;
@@ -116,12 +116,25 @@ public class Card {
     public void setStatus(CardStatus status) {
         this.status = status;
     }
+    
+    
+    public double getBalance() {
+		return balance;
+	}
 
-    // Enum for card status
+	public void setBalance(double balance) {
+		this.balance = balance;
+	}
+
+
+	// Enum for card status
     public enum CardStatus {
         PENDING,
         APPROVED,
-        REJECTED;
+        REJECTED,
+        CANCELLED_PENDING,
+        CANCELLED,
+    	
     }
 
 }

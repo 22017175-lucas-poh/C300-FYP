@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>RP digital Bank - Register A New Account</title>
+<link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+<script src="/bootstrap/js/bootstrap.min.js"></script>
+</head>
+<body>
+	<div class="container">
+		<div th:replace="fragments/header"></div>
+		<main>
+			<form th:action="@{/register}" method="post" th:object="${member}">
+				<h1 class="text-center">Welcome to RP Digital Bank</h1>
+				<p class="text-muted text-center">Create a new account</p>
+
+				<div th:if="${param.error}" class="alert alert-danger">
+					<strong>Error:</strong> Invalid registration details.
+				</div>
+
+				<div class="form-group">
+					<label for="username" class="form-label">Username</label> <input
+						type="text" class="form-control" id="username" name="username"
+						required />
+				</div>
+
+				<div class="form-group">
+					<label for="password" class="form-label">Password</label> <input
+						type="password" class="form-control" id="password" name="password"
+						required />
+				</div>
+
+				<div class="form-group">
+					<label for="name" class="form-label">Name</label> <input
+						type="text" class="form-control" id="name" name="name" required />
+				</div>
+
+				<div class="form-group">
+					<label for="email" class="form-label">Email</label> <input
+						type="text" class="form-control" id="email" name="email" required />
+				</div>
+				<div class="form-group">
+					<label for="nric" class="form-label">NRIC</label> <input
+						type="text" class="form-control" id="nric" name="nric" required />
+				</div>
+				<div class="text-center">
+					<button type="submit" class="btn btn-primary">Register</button>
+				</div>
+			</form>
+		</main>
+	</div>
+</body>
+</html>
