@@ -275,7 +275,7 @@ public class CardController {
 			msg.setTo(to);
 			msg.setSubject(subject);
 			msg.setText(body);
-			msg.setFrom("musashibestgirl990@gmail");
+			msg.setFrom("musashibestgirl990@gmail.com");
 
 			javaMailSender.send(msg);
 			System.out.println("Email sent successfully to: " + to);

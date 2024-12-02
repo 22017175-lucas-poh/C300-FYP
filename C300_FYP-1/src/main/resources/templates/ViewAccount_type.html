@@ -21,12 +21,17 @@ a:hover {
 	color: #0056b3; /* Darker blue on hover */
 	text-decoration: underline; /* Underline on hover */
 }
+ .btn-apply {
+            margin-bottom: 15px;
+        }
 </style>
 </head>
 <body>
 	<div class="container">
 		<div th:replace="fragments/header"></div>
 		<h1>View Account Type</h1>
+		        <a href="/Account_type/add" class="btn btn-primary btn-apply">Add an Account type</a>
+		
 		<table class="table table-bordered">
 			<thead>
 				<tr>

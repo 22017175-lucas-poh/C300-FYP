@@ -14,7 +14,10 @@
 package E63C.Lucas.LP01;
 
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,6 +38,8 @@ public class MemberController {
 
 	@Autowired
 	private MemberRepository memberRepository;
+	@Autowired
+	private JavaMailSender javaMailSender;
 
 	@GetMapping("/Member")
 	public String viewMembers(Model model) {
@@ -67,6 +72,7 @@ public class MemberController {
 		member.setLockTime(null);
 		memberRepository.save(member);
 
+
 		redirectAttribute.addFlashAttribute("success", "Member registered!");
 		return "redirect:/Member";
 	}
@@ -96,6 +102,16 @@ public class MemberController {
 		String encodedPassword = passwordEncoder.encode(member.getPassword());
 		member.setPassword(encodedPassword);
 		memberRepository.save(member);
+		
+		   // Send email to customer
+        String customerEmail = member.getEmail();
+        String subject = "Welcome to Our Application!";
+        String body = "Dear " + member.getUsername() + ",\n\n" +
+                      "Thank you for registering with our application. We are excited to have you on board!\n\n" +
+                      "If you have any questions or need assistance, feel free to reach out to our support team.\n\n" +
+                      "Best Regards,\n" +
+                      "RP Digital Bank";
+        sendEmail(customerEmail, subject, body);
 
 		redirectAttributes.addFlashAttribute("success", "Registration successful! Please log in.");
 		return "redirect:/login";
@@ -138,5 +154,19 @@ public class MemberController {
 	public String showForgetpassword(Model model) {
 		model.addAttribute("member", new Member());
 		return "forget";
+	}
+	public void sendEmail(String to, String subject, String body) {
+		try {
+			SimpleMailMessage msg = new SimpleMailMessage();
+			msg.setTo(to);
+			msg.setSubject(subject);
+			msg.setText(body);
+			msg.setFrom("musashibestgirl990@gmail.com");
+
+			javaMailSender.send(msg);
+			System.out.println("Email sent successfully to: " + to);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

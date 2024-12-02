@@ -67,7 +67,7 @@ public class ConsultationController {
 
         return "redirect:/consultations";
     }
-    @GetMapping("/Admin/Consultations")
+    @GetMapping("/Admin/consultations")
     public String viewAllConsultations(Model model) {
         // Fetch all consultations
         List<Consultation> listAllConsultations = consultationRepository.findAll();
