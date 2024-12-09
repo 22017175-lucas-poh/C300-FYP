@@ -34,13 +34,17 @@ public class WebSecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
 				.requestMatchers("/Admin/Card", "/Admin/Card/Approve/*", "/Admin/Card/Reject/*", "/Admin/Card/Edit/*",
-						"/Admin/Card/Delete/*", "/Account_type", "/Account_type/add", "/Account_type/edit/*",
-						"/Account_type/delete/*")
+						"/Admin/Card/Delete/*")
+//						"/Account_type", "/Account_type/add", "/Account_type/edit/*","/Account_type/delete/*")
 				.hasAnyRole("BO", "FA")
-				.requestMatchers("/Admin/consultations", "/Admin/consultations/edit/*", "/Admin/consultations/delete")
-				.hasRole("FA").requestMatchers("/Member", "/Member/add", "/Member/edit/*", "/Member/delete/*")
-				.hasRole("BO").requestMatchers("/").permitAll() // Home page is visible without logging in
-				.requestMatchers("/register").permitAll().requestMatchers("/forget").permitAll()
+				.requestMatchers("/Member",
+						"/Member/add",
+						"/Member/edit/*",
+						"/Member/save",
+						"/Member/delete/*").hasRole("BO")
+				.requestMatchers("/consultations/delete/*","/consultations/edit/*","/Admin/consultations", "/Admin/consultations/edit/*", "/Admin/consultations/delete").hasRole("FA")
+				.requestMatchers("/").permitAll() // Home page is visible without logging in
+				.requestMatchers("/register").permitAll().requestMatchers("/forget").permitAll().requestMatchers("/resetPassword").permitAll()
 				.requestMatchers("/bootstrap/*/*").permitAll() // for static resources, visible to all
 				.requestMatchers("/images/*").permitAll() // for static resources, visible to all
 				.anyRequest().authenticated())// Any other requests not specified earlier

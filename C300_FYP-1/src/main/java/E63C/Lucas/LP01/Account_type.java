@@ -30,8 +30,8 @@ public class Account_type {
     private String name;  
     private String description; 
 
-    @OneToMany(mappedBy = "account_type")
-    private Set<Card> card;
+//    @OneToMany(mappedBy = "account_type")
+//    private Set<Card> card;
 
     // Default constructor
     public Account_type() {}

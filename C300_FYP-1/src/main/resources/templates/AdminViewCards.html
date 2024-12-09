@@ -45,7 +45,7 @@
         <tbody>
             <th:block th:each="Card : ${listCard}">
                 <tr>
-                    <td th:text="${Card.account_type.name}"></td>
+                    <td th:text="${Card.cardType.name}"></td>
                     <td th:text="${Card.cardNumber}"></td>
                     <td th:text="${Card.CVV}"></td>
                     <td th:text="${Card.expiryDate}"></td>

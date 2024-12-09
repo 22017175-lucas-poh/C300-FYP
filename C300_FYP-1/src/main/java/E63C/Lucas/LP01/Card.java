@@ -28,10 +28,15 @@ public class Card {
 
     @Enumerated(EnumType.STRING) // Store enum as string in the database
     private CardStatus status;
-
+    
     @ManyToOne
-    @JoinColumn(name = "account_type_id", nullable = false)
-    private Account_type account_type;
+    @JoinColumn(name = "card_type_id", nullable = false)
+    private Card_type cardType; // Link to Card_type
+
+
+//    @ManyToOne
+//    @JoinColumn(name = "account_type_id", nullable = false)
+//    private Account_type account_type;
 
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false) // Member associated with card
@@ -93,13 +98,15 @@ public class Card {
         this.bankName = bankName;
     }
 
-    public Account_type getAccount_type() {
-        return account_type;
-    }
-
-    public void setAccount_type(Account_type account_type) {
-        this.account_type = account_type;
-    }
+//    public Account_type getAccount_type() {
+//        return account_type;
+//    }
+//
+//    public void setAccount_type(Account_type account_type) {
+//        this.account_type = account_type;
+//    }
+    
+    
 
     public Member getMember() {
         return member;
@@ -108,8 +115,17 @@ public class Card {
     public void setMember(Member member) {
         this.member = member;
     }
+    
 
-    public CardStatus getStatus() {
+    public Card_type getCardType() {
+		return cardType;
+	}
+
+	public void setCardType(Card_type cardType) {
+		this.cardType = cardType;
+	}
+
+	public CardStatus getStatus() {
         return status;
     }
 
@@ -135,6 +151,10 @@ public class Card {
         CANCELLED_PENDING,
         CANCELLED,
     	
+    }
+    public enum AccountType {
+        CREDIT,
+        DEBIT
     }
 
 }

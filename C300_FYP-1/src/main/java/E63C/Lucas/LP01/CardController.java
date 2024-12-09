@@ -30,7 +30,8 @@ public class CardController {
 
 	@Autowired
 	private AccountRepository accountRepository;
-
+	@Autowired
+	private CardTypeRepository cardTypeRepository;
 	@Autowired
 	private JavaMailSender javaMailSender;
 	@Autowired
@@ -55,82 +56,90 @@ public class CardController {
 
 	@GetMapping("/Card/add")
 	public String addCard(Model model) {
-		model.addAttribute("card", new Card());
-		List<Account_type> accountTypeList = accountRepository.findAll();
-		model.addAttribute("accountTypeList", accountTypeList);
-		return "AddCard"; // A page for adding a new card
+	    model.addAttribute("card", new Card());  // Empty Card object for form binding
+	    List<Card_type> cardTypeList = cardTypeRepository.findAll();  // Get list of CardType from DB
+	    model.addAttribute("cardTypeList", cardTypeList);  // Add CardType list to the model
+	    return "AddCard"; // Page for adding a new card
 	}
+
 
 	@PostMapping("/Card/save")
 	public String saveCard(@ModelAttribute Card card, Model model) {
-		// Constants for Card Number and CVV Generation
-		final int CARD_NUMBER_MIN = 100_000_000;
-		final int CARD_NUMBER_MAX = 999_999_999;
-		final int CVV_MIN = 100;
-		final int CVV_MAX = 999;
+	    // Constants for Card Number and CVV Generation
+	    final int CARD_NUMBER_MIN = 100_000_000;
+	    final int CARD_NUMBER_MAX = 999_999_999;
+	    final int CVV_MIN = 100;
+	    final int CVV_MAX = 999;
 
-		Random random = new Random();
+	    Random random = new Random();
 
-		// Get the current logged-in member
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String username = authentication.getName();
+	    // Get the current logged-in member
+	    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+	    String username = authentication.getName();
 
-		// Fetch the member based on the username
-		Member loggedInMember = memberRepository.findByUsername(username);
+	    // Fetch the member based on the username
+	    Member loggedInMember = memberRepository.findByUsername(username);
 
-		// Set the member to the card
-		card.setMember(loggedInMember);
+	    // Set the member to the card
+	    card.setMember(loggedInMember);
 
-		// Generate a random card number if not provided
-		if (card.getCardNumber() == 0) {
-			card.setCardNumber(CARD_NUMBER_MIN + random.nextInt(CARD_NUMBER_MAX - CARD_NUMBER_MIN + 1));
-		}
+	    // Generate a random card number if not provided
+	    if (card.getCardNumber() == 0) {
+	        card.setCardNumber(CARD_NUMBER_MIN + random.nextInt(CARD_NUMBER_MAX - CARD_NUMBER_MIN + 1));
+	    }
 
-		// Generate a random CVV if not provided
-		if (card.getCVV() == 0) {
-			card.setCVV(CVV_MIN + random.nextInt(CVV_MAX - CVV_MIN + 1));
-		}
+	    // Generate a random CVV if not provided
+	    if (card.getCVV() == 0) {
+	        card.setCVV(CVV_MIN + random.nextInt(CVV_MAX - CVV_MIN + 1));
+	    }
 
-		// Set expiry date to 4 years from now if not provided
-		if (card.getExpiryDate() == null) {
-			Calendar calendar = Calendar.getInstance();
-			calendar.add(Calendar.YEAR, 4); // Add 4 years to the current date
-			java.util.Date utilDate = calendar.getTime(); // Get java.util.Date
-			java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime()); // Convert to java.sql.Date
-			card.setExpiryDate(sqlDate); // Set the expiry date
-		}
+	    // Set expiry date to 4 years from now if not provided
+	    if (card.getExpiryDate() == null) {
+	        Calendar calendar = Calendar.getInstance();
+	        calendar.add(Calendar.YEAR, 4); // Add 4 years to the current date
+	        java.util.Date utilDate = calendar.getTime(); // Get java.util.Date
+	        java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime()); // Convert to java.sql.Date
+	        card.setExpiryDate(sqlDate); // Set the expiry date
+	    }
 
-		// Set bank name to "RP Digital Bank" if not provided
-		if (card.getBankName() == null || card.getBankName().isEmpty()) {
-			card.setBankName("RP Digital Bank");
-		}
+	    // Set bank name to "RP Digital Bank" if not provided
+	    if (card.getBankName() == null || card.getBankName().isEmpty()) {
+	        card.setBankName("RP Digital Bank");
+	    }
 
-		// Check for duplicate card number
-		List<Card> existingCardNumbers = cardRepository.findByCardNumber(card.getCardNumber());
-		if (!existingCardNumbers.isEmpty()) {
-			model.addAttribute("duplicateCard_Error", true);
-			List<Account_type> accountTypeList = accountRepository.findAll();
-			model.addAttribute("accountTypeList", accountTypeList);
-			model.addAttribute("card", card);
-			return "AddCard"; // Return to add card page if duplicate is found
-		}
+	    // Check for duplicate card number
+	    List<Card> existingCardNumbers = cardRepository.findByCardNumber(card.getCardNumber());
+	    if (!existingCardNumbers.isEmpty()) {
+	        model.addAttribute("duplicateCard_Error", true);
+	        
+	        // Replace accountTypeList with cardTypeList
+	        List<Card_type> cardTypeList = cardTypeRepository.findAll();
+	        model.addAttribute("cardTypeList", cardTypeList); // Adding CardType list to the model
+	        
+	        model.addAttribute("card", card); // Passing the card with all its data
+	        return "AddCard"; // Return to add card page if duplicate is found
+	    }
 
-		// Save the card to the database
-		cardRepository.save(card);
+	    // Save the card to the database
+	    cardRepository.save(card);
 
-		// Send email to admin
-		String adminEmail = "lucaspoh7@gmail.com";
-		String subject = "Card Application Received";
-		String body = "A new card has been applied with the following details:\n" + "Card Number: "
-				+ card.getCardNumber() + "\n" + "Account Type: " + card.getAccount_type().getName() + "\n" + "CVV/CVC: "
-				+ card.getCVV() + "\n" + "Expiry Date: " + card.getExpiryDate() + "\n" + "Bank Name: "
-				+ card.getBankName() + "\n\n" + "Please review this application.";
+	    // Send email to admin
+	    String adminEmail = "lucaspoh7@gmail.com";
+	    String subject = "Card Application Received";
+	    String body = "A new card has been applied with the following details:\n" + 
+	                  "Card Number: " + card.getCardNumber() + "\n" + 
+	                  "Card Type: " + card.getCardType().getName() + "\n" +  // Changed AccountType to CardType
+	                  "CVV/CVC: " + card.getCVV() + "\n" + 
+	                  "Expiry Date: " + card.getExpiryDate() + "\n" + 
+	                  "Bank Name: " + card.getBankName() + "\n\n" + 
+	                  "Please review this application.";
 
-		sendEmail(adminEmail, subject, body);
+	    sendEmail(adminEmail, subject, body);
 
-		// Redirect to the success page
-		return "redirect:/Card";
+	    // Redirect to the success page
+	    return "redirect:/Card"; // Redirect to the list or another page
 	}
+
 
 	@GetMapping("/Admin/Card")
 	public String viewAllCards(Model model) {
@@ -189,7 +198,7 @@ public class CardController {
 			return "redirect:/Admin/Card"; // Redirect if card not found
 		}
 
-		existingCard.setAccount_type(card.getAccount_type());
+		existingCard.setCardType(card.getCardType());
 		existingCard.setCardNumber(card.getCardNumber());
 		existingCard.setCVV(card.getCVV());
 		existingCard.setExpiryDate(card.getExpiryDate());

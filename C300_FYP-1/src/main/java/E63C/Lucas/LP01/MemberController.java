@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
@@ -72,7 +73,6 @@ public class MemberController {
 		member.setLockTime(null);
 		memberRepository.save(member);
 
-
 		redirectAttribute.addFlashAttribute("success", "Member registered!");
 		return "redirect:/Member";
 	}
@@ -102,21 +102,20 @@ public class MemberController {
 		String encodedPassword = passwordEncoder.encode(member.getPassword());
 		member.setPassword(encodedPassword);
 		memberRepository.save(member);
-		
-		   // Send email to customer
-        String customerEmail = member.getEmail();
-        String subject = "Welcome to Our Application!";
-        String body = "Dear " + member.getUsername() + ",\n\n" +
-                      "Thank you for registering with our application. We are excited to have you on board!\n\n" +
-                      "If you have any questions or need assistance, feel free to reach out to our support team.\n\n" +
-                      "Best Regards,\n" +
-                      "RP Digital Bank";
-        sendEmail(customerEmail, subject, body);
+
+		// Send email to customer
+		String customerEmail = member.getEmail();
+		String subject = "Welcome to Our Application!";
+		String body = "Dear " + member.getUsername() + ",\n\n"
+				+ "Thank you for registering with our application. We are excited to have you on board!\n\n"
+				+ "If you have any questions or need assistance, feel free to reach out to our support team.\n\n"
+				+ "Best Regards,\n" + "RP Digital Bank";
+		sendEmail(customerEmail, subject, body);
 
 		redirectAttributes.addFlashAttribute("success", "Registration successful! Please log in.");
 		return "redirect:/login";
 	}
-	
+
 	// edit
 	@GetMapping("/Member/edit/{id}")
 	public String editMember(@PathVariable("id") Integer id, Model model) {
@@ -137,8 +136,8 @@ public class MemberController {
 		member.setFailedAttempt(0);
 		member.setLockTime(null);
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        String encodedPassword = passwordEncoder.encode(member.getPassword());
-        member.setPassword(encodedPassword);
+		String encodedPassword = passwordEncoder.encode(member.getPassword());
+		member.setPassword(encodedPassword);
 		// Save the updated member
 		memberRepository.save(member);
 		return "redirect:/Member";
@@ -149,12 +148,7 @@ public class MemberController {
 		memberRepository.deleteById(id);
 		return "redirect:/Member";
 	}
-	
-	@GetMapping("/forget")
-	public String showForgetpassword(Model model) {
-		model.addAttribute("member", new Member());
-		return "forget";
-	}
+
 	public void sendEmail(String to, String subject, String body) {
 		try {
 			SimpleMailMessage msg = new SimpleMailMessage();
@@ -168,5 +162,55 @@ public class MemberController {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	@GetMapping("/forget")
+	public String showForgetpassword(Model model) {
+		model.addAttribute("member", new Member());
+		return "forget";
+	}
+
+	@PostMapping("/forget")
+	public String processForgotPassword(@RequestParam("username") String username, Model model) {
+		Member member = memberRepository.findByUsername(username);
+		if (member == null) {
+			model.addAttribute("error", "Username not found");
+			return "forget";
+		}
+		model.addAttribute("member", member);
+		return "resetPassword";
+	}
+
+	@GetMapping("/resetPassword")
+	public String showResetPassword(@RequestParam(value = "id", required = false) Integer id, Model model) {
+		if (id == null) {
+			model.addAttribute("error", "Invalid member ID");
+			return "forget"; // Redirect back to the forget password page
+		}
+		Member member = memberRepository.getReferenceById(id);
+		if (member == null) {
+			model.addAttribute("error", "Member not found");
+			return "forget";
+		}
+		model.addAttribute("member", member);
+		return "resetPassword";
+	}
+
+	@PostMapping("/resetPassword")
+	public String resetPassword(@RequestParam("id") Integer id, @RequestParam("password") String password,
+			@RequestParam("confirmPassword") String confirmPassword, Model model) {
+		if (!password.equals(confirmPassword)) {
+			model.addAttribute("error", "Passwords do not match");
+			model.addAttribute("member", memberRepository.getReferenceById(id));
+			return "resetPassword";
+		}
+
+		Member member = memberRepository.getReferenceById(id);
+		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		String encodedPassword = passwordEncoder.encode(password);
+		member.setPassword(encodedPassword);
+		memberRepository.save(member);
+
+		return "redirect:/login";
 	}
 }
