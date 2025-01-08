@@ -29,7 +29,7 @@ public class CardController {
 //	private PendingCardRepository pendingCardRepository;
 
 	@Autowired
-	private AccountRepository accountRepository;
+	private AccountTypeRepository accountRepository;
 	@Autowired
 	private CardTypeRepository cardTypeRepository;
 	@Autowired
@@ -174,19 +174,20 @@ public class CardController {
 	}
 
 	@GetMapping("/Admin/Card/Edit/{id}")
-	public String editCard(@PathVariable("id") int id, Model model) {
-		// Fetch the card using the Integer type id
-		Card card = cardRepository.findById(id).orElse(null);
-		if (card == null) {
-			return "redirect:/Admin/Card"; // Redirect if card not found
-		}
+	public String editCard(@PathVariable("id") Integer id, Model model) {
+	    // Fetch the card by its ID
+	    Card card = cardRepository.findById(id).orElse(null);
+	    if (card == null) return "redirect:/Admin/Card"; // If card is not found, redirect to the card list.
 
-		// Add the card and account types to the model
-		List<Account_type> accountTypeList = accountRepository.findAll();
-		model.addAttribute("card", card);
-		model.addAttribute("accountTypeList", accountTypeList);
+	    // Add the card object to the model
+	    model.addAttribute("card", card);
 
-		return "EditCard"; // Return the edit card page
+	    // Fetch all card types and pass them to the view
+	    List<Card_type> cardTypeList = cardTypeRepository.findAll();
+	    model.addAttribute("cardTypeList", cardTypeList); // Correct attribute name to match your form.
+
+	    // Return the "EditCard" view for editing the selected card
+	    return "EditCard";
 	}
 
 	@PostMapping("/Admin/Card/Edit/{id}")

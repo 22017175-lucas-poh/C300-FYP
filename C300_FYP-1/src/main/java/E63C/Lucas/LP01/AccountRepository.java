@@ -13,16 +13,12 @@
 
 package E63C.Lucas.LP01;
 
-import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
 
-
-/**
- * @author Lenovo
- *
- */
-
-public interface AccountRepository extends JpaRepository<Account_type,Integer>{
-    List<Account_type> findByName(String name);
+public interface AccountRepository extends JpaRepository<Account, Integer> {
+    // Update the method to use accountName instead of name
+    List<Account> findByAccountName(String accountName);  
+    List<Account> findByMemberId(Integer memberId);
 
 }
