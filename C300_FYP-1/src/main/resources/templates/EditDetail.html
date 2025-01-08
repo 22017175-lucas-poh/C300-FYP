@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>RP Digital Bank - Edit Your Details</title>
+<link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+<script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+<style>
+body {
+	background: linear-gradient(to right, #74ebd5, #acb6e5);
+	font-family: 'Arial', sans-serif;
+}
+
+.container {
+	max-width: 600px;
+	background-color: #fff;
+	padding: 30px;
+	border-radius: 10px;
+	box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+	margin: 50px auto;
+}
+
+h1 {
+	color: #333;
+	font-size: 1.8rem;
+	text-align: center;
+	margin-bottom: 20px;
+}
+
+.form-label {
+	font-weight: bold;
+	color: #555;
+}
+
+.form-control {
+	border: 1px solid #ccc;
+	border-radius: 5px;
+}
+
+.form-control:focus {
+	border-color: #74b9ff;
+	box-shadow: 0 0 5px rgba(116, 185, 255, 0.8);
+}
+
+.btn-primary {
+	background-color: #0984e3;
+	border: none;
+	padding: 10px 20px;
+	font-size: 1rem;
+	border-radius: 5px;
+	transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+	background-color: #74b9ff;
+}
+
+fieldset {
+	border: 1px solid #ddd;
+	border-radius: 5px;
+	padding: 20px;
+	margin-bottom: 20px;
+}
+
+legend {
+	font-size: 1.2rem;
+	font-weight: bold;
+	color: #555;
+}
+
+footer {
+	text-align: center;
+	margin-top: 30px;
+	font-size: 0.9rem;
+	color: #555;
+}
+</style>
+</head>
+<body>
+	<div class="container">
+		<div th:replace="fragments/header"></div>
+		<div class="container">
+			<main>
+				<h1>Edit Your Details</h1>
+				<form th:action="@{/Member/detail}" th:object="${member}"
+					method="post" novalidate>
+					<fieldset>
+						<legend>Personal Information</legend>
+						<div class="mb-3">
+							<label for="customId" class="form-label">ID</label> 
+							<input id="customId" class="form-control" type="text" th:field="*{customId}" readonly>
+						</div>
+						<div class="mb-3">
+							<label for="member_name" class="form-label">Member Name</label> 
+							<input id="member_name" class="form-control" type="text" th:field="*{name}">
+						</div>
+						<div class="mb-3">
+							<label for="member_username" class="form-label">Username</label> 
+							<input id="member_username" class="form-control" type="text" th:field="*{username}">
+						</div>
+						<div class="mb-3">
+							<label for="member_nric" class="form-label">NRIC</label> 
+							<input id="member_nric" class="form-control" type="text" th:field="*{nric}">
+						</div>
+						<div class="mb-3">
+							<label for="member_email" class="form-label">Email</label> 
+							<input id="member_email" class="form-control" type="text" th:field="*{email}">
+						</div>
+						<div class="mb-3">
+							<label for="member_password" class="form-label">Password</label> 
+							<input id="member_password" class="form-control" type="password" th:field="*{password}">
+						</div>
+					</fieldset>
+					<div class="text-center">
+						<input type="submit" value="Update Details" class="btn btn-primary">
+					</div>
+				</form>
+			</main>
+		</div>
+		<footer>
+			<div th:replace="fragments/footer"></div>
+		</footer>
+	</div>
+</body>
+</html>

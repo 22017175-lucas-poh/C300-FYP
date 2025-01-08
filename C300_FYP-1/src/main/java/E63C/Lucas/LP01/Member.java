@@ -16,6 +16,7 @@ package E63C.Lucas.LP01;
 import java.sql.Date;
 import java.util.Set;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -31,6 +32,10 @@ public class Member {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
+	
+	@Column(name = "custom_id", nullable = true)
+	private String customId;
+	
 	@NotEmpty(message = "Member name cannot be empty")
 	@Size(min = 4, max = 50, message = "Member name length must be between 5 and 50 characters!")
 	private String name;
@@ -47,7 +52,10 @@ public class Member {
 	@Size(min = 5, max = 50, message = "Member email length must be between 5 and 50 characters!")
 	private String email;
 
+	@NotEmpty(message = "Member nric cannot be empty")
+	@Size(min = 9, max = 9, message = "Member nric length must be between 9 characters!")
 	private String nric;
+	
 	private String role;
 	private boolean accountNonLocked;
 	private int failedAttempt;
@@ -56,6 +64,14 @@ public class Member {
 	@OneToMany(mappedBy = "member")
 	private Set<Consultation> consultations;
 
+	public String getCustomId() {
+	    return customId;
+	}
+
+	public void setCustomId(String customId) {
+	    this.customId = customId;
+	}
+	
 	public String getUsername() {
 		return username;
 	}

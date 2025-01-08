@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface MemberRepository extends JpaRepository<Member, Integer> {
 	List<Member> findByName(String name);
@@ -16,7 +17,12 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
 	@Modifying
 	public void updateFailedAttempts(int failAttempts, String username);
 
+	@Query("SELECT MAX(m.customId) FROM Member m WHERE m.customId LIKE CONCAT(:prefix, '%')")
+	String findMaxCustomIdByPrefix(@Param("prefix") String prefix);
+	
 	Member getByUsername(String username);
 
 	Member accountNonLocked(boolean accountNonLocked);
+	
+	Member findByEmail(String email);
 }

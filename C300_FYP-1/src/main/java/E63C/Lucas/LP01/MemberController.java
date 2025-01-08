@@ -14,10 +14,15 @@
 package E63C.Lucas.LP01;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,6 +34,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
 /**
@@ -57,26 +64,43 @@ public class MemberController {
 
 	@PostMapping("/Member/save")
 	public String saveMember(RedirectAttributes redirectAttribute, @Valid Member member, BindingResult bindingResult) {
+	    if (bindingResult.hasErrors()) {
+	        return "AddMember";
+	    }
 
-		if (bindingResult.hasErrors()) {
-			System.out.println("error");
-			return "AddMember";
-		}
+	    // Set default role if not provided
+	    if (member.getRole() == null || member.getRole().isEmpty()) {
+	        member.setRole("ROLE_USER");
+	    }
 
-		// Validation successful, proceed with saving the member
-		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		String encodedPassword = passwordEncoder.encode(member.getPassword());
-		member.setPassword(encodedPassword);
+	    // Encode password
+	    BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+	    member.setPassword(passwordEncoder.encode(member.getPassword()));
 
-		member.setAccountNonLocked(true);
-		member.setFailedAttempt(0);
-		member.setLockTime(null);
-		memberRepository.save(member);
+	    // Set default properties
+	    member.setAccountNonLocked(true);
+	    member.setFailedAttempt(0);
+	    member.setLockTime(null);
 
-		redirectAttribute.addFlashAttribute("success", "Member registered!");
-		return "redirect:/Member";
+	    // Save to generate the `id` first
+	    member = memberRepository.save(member);
+
+	    // Generate customId using the generated ID and role
+	    String prefix = switch (member.getRole()) {
+	        case "ROLE_BO" -> "BO";
+	        case "ROLE_FA" -> "FA";
+	        default -> "UR";
+	    };
+	    String customId = prefix + String.format("%05d", member.getId()); // e.g., BO00001
+	    member.setCustomId(customId);
+
+	    // Save again with customId
+	    memberRepository.save(member);
+
+	    redirectAttribute.addFlashAttribute("success", "Member registered successfully!");
+	    return "redirect:/Member";
 	}
-
+	
 	@GetMapping("/register")
 	public String showRegistrationForm(Model model) {
 		model.addAttribute("member", new Member());
@@ -84,36 +108,49 @@ public class MemberController {
 	}
 
 	@PostMapping("/register")
-	public String registerUser(@ModelAttribute("member") @Valid Member member, BindingResult result,
-			RedirectAttributes redirectAttributes) {
-		if (result.hasErrors()) {
-			return "register";
-		}
-		if (memberRepository.findByUsername(member.getUsername()) != null) {
-			result.rejectValue("username", "username.exists", "Username already exists");
-			return "register";
-		}
+	public String registerUser(RedirectAttributes redirectAttribute, @Valid Member member, BindingResult bindingResult) {
+	    if (bindingResult.hasErrors()) {
+	        return "register";
+	    }
 
-		member.setRole("ROLE_USER");
-		member.setAccountNonLocked(true);
-		member.setFailedAttempt(0);
-		member.setLockTime(null);
-		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		String encodedPassword = passwordEncoder.encode(member.getPassword());
-		member.setPassword(encodedPassword);
-		memberRepository.save(member);
+	    // Check if username exists
+	    if (memberRepository.findByUsername(member.getUsername()) != null) {
+	        bindingResult.rejectValue("username", "username.exists", "Username already exists");
+	        return "register";
+	    }
 
-		// Send email to customer
-		String customerEmail = member.getEmail();
-		String subject = "Welcome to Our Application!";
-		String body = "Dear " + member.getUsername() + ",\n\n"
-				+ "Thank you for registering with our application. We are excited to have you on board!\n\n"
-				+ "If you have any questions or need assistance, feel free to reach out to our support team.\n\n"
-				+ "Best Regards,\n" + "RP Digital Bank";
-		sendEmail(customerEmail, subject, body);
+	    // Default role for new members
+	    member.setRole("ROLE_USER");
 
-		redirectAttributes.addFlashAttribute("success", "Registration successful! Please log in.");
-		return "redirect:/login";
+	    // Encode password
+	    BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+	    member.setPassword(passwordEncoder.encode(member.getPassword()));
+
+	    member.setAccountNonLocked(true);
+	    member.setFailedAttempt(0);
+	    member.setLockTime(null);
+	    
+	    // Save to generate the `id` first
+	    member = memberRepository.save(member);
+
+	    // Generate customId using the generated ID and role
+	    String prefix = switch (member.getRole()) {
+	        case "ROLE_BO" -> "BO";
+	        case "ROLE_FA" -> "FA";
+	        default -> "UR";
+	    };
+	    String customId = prefix + String.format("%05d", member.getId()); // e.g., BO00001
+	    member.setCustomId(customId);
+
+	    // Save again with customId
+	    memberRepository.save(member);
+
+	    // Send welcome email
+	    sendEmail(member.getEmail(), "Welcome to Our Application!", "Dear " + member.getUsername() +
+	            ",\n\nThank you for registering with us. Your ID is: " + customId);
+
+	    redirectAttribute.addFlashAttribute("success", "Registration successful! Please log in.");
+	    return "redirect:/login";
 	}
 
 	// edit
@@ -125,23 +162,48 @@ public class MemberController {
 	}
 
 	@PostMapping("/Member/edit/{id}")
-	public String saveUpdatedMember(@PathVariable("id") Integer id, @Valid Member member, BindingResult bindingResult) {
-		if (bindingResult.hasErrors()) {
-			// Handle validation errors (return to the edit page with errors)
-			return "EditMember"; // Ensure to return the correct view with errors
-		}
-		// Retrieve the existing member from the repository
-		Member existingMember = memberRepository.getReferenceById(id);
-		member.setAccountNonLocked(true);
-		member.setFailedAttempt(0);
-		member.setLockTime(null);
-		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		String encodedPassword = passwordEncoder.encode(member.getPassword());
-		member.setPassword(encodedPassword);
-		// Save the updated member
-		memberRepository.save(member);
-		return "redirect:/Member";
+	public String saveUpdatedMember(@PathVariable("id") Integer id, @Valid Member member, BindingResult bindingResult, Model model) {
+	    if (bindingResult.hasErrors()) {
+	        model.addAttribute("member", memberRepository.getReferenceById(id));
+	        return "EditMember";
+	    }
+
+	    // Fetch the existing member to ensure immutability for certain fields
+	    Member existingMember = memberRepository.getReferenceById(id);
+
+	    // Update mutable fields
+	    existingMember.setName(member.getName());
+	    existingMember.setUsername(member.getUsername());
+	    existingMember.setEmail(member.getEmail());
+	    existingMember.setRole(member.getRole());
+	    existingMember.setAccountNonLocked(member.isAccountNonLocked());
+	    existingMember.setFailedAttempt(member.getFailedAttempt());
+	    existingMember.setLockTime(member.getLockTime());
+
+	    // Update password only if provided
+	    if (member.getPassword() != null && !member.getPassword().isEmpty()) {
+	        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+	        existingMember.setPassword(passwordEncoder.encode(member.getPassword()));
+	    }
+
+	    // If the role has changed, update the customId
+	    if (!existingMember.getRole().equals(member.getRole())) {
+	        String prefix = switch (member.getRole()) {
+	            case "ROLE_BO" -> "BO";
+	            case "ROLE_FA" -> "FA";
+	            default -> "UR";
+	        };
+	        String numericPart = existingMember.getCustomId().substring(2); // Extract the numeric part of the existing customId
+	        String updatedCustomId = prefix + numericPart;
+	        existingMember.setCustomId(updatedCustomId);
+	    }
+
+	    // Save the updated member details
+	    memberRepository.save(existingMember);
+
+	    return "redirect:/Member";
 	}
+
 
 	@GetMapping("/Member/delete/{id}")
 	public String deleteMember(@PathVariable("id") Integer id) {
@@ -163,54 +225,128 @@ public class MemberController {
 			e.printStackTrace();
 		}
 	}
+	
+	@GetMapping("/Member/detail")
+	public String editLoggedInMember(Model model) {
+	    // Get the logged-in username
+	    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+	    String username = authentication.getName();
 
-	@GetMapping("/forget")
-	public String showForgetpassword(Model model) {
-		model.addAttribute("member", new Member());
-		return "forget";
+	    // Fetch the logged-in user's member details
+	    Member member = memberRepository.findByUsername(username);
+
+	    if (member == null) {
+	        throw new RuntimeException("Member not found!");
+	    }
+
+	    // Pass the member details to the view
+	    model.addAttribute("member", member);
+	    return "EditDetail";
 	}
+	
+	@PostMapping("/Member/detail")
+	public String saveUpdatedLoggedInMember(@Valid @ModelAttribute("member") Member updatedMember, 
+	                                        BindingResult bindingResult, 
+	                                        RedirectAttributes redirectAttributes) {
+	    if (bindingResult.hasErrors()) {
+	        return "EditDetail"; // Show the form with error messages
+	    }
 
+	    // Get the logged-in username
+	    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+	    String username = authentication.getName();
+
+	    // Fetch the existing member
+	    Member existingMember = memberRepository.findByUsername(username);
+	    if (existingMember == null) {
+	        throw new RuntimeException("Member not found!");
+	    }
+
+	    // Update fields
+	    existingMember.setName(updatedMember.getName());
+	    existingMember.setUsername(updatedMember.getUsername());
+	    existingMember.setEmail(updatedMember.getEmail());
+	    existingMember.setNric(updatedMember.getNric());
+
+	    // Only update password if a new one is provided
+	    if (updatedMember.getPassword() != null && !updatedMember.getPassword().isEmpty()) {
+	        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+	        existingMember.setPassword(passwordEncoder.encode(updatedMember.getPassword()));
+	    }
+
+	    // Save the updated member
+	    memberRepository.save(existingMember);
+
+	    redirectAttributes.addFlashAttribute("success", "Details updated successfully!");
+	    return "redirect:/dashboard";
+	}
+	
 	@PostMapping("/forget")
-	public String processForgotPassword(@RequestParam("username") String username, Model model) {
-		Member member = memberRepository.findByUsername(username);
-		if (member == null) {
-			model.addAttribute("error", "Username not found");
-			return "forget";
-		}
-		model.addAttribute("member", member);
-		return "resetPassword";
+	public String processForgotPassword(@RequestParam("username") String username, @RequestParam("email") String email,
+	                                    Model model, HttpSession session) {
+	    // Find the member by username and email
+	    Member member = memberRepository.findByUsername(username);
+	    if (member == null || !member.getEmail().equals(email)) {
+	        model.addAttribute("error", "Invalid username or email");
+	        return "forget"; 
+	    }
+	    model.addAttribute("member", member);
+	    Random random = new Random();
+	    String otp = String.format("%06d", random.nextInt(1000000));
+	 // Store OTP in model 
+	    session.setAttribute("otp", otp);
+        session.setAttribute("memberId", member.getId()); 
+	 // Send OTP email
+	    sendEmail(member.getEmail(), "Password Reset OTP", "Dear " + member.getUsername() +
+	            ",\n\nYou recently requested to reset your password for RP Digital Bank ."
+	            + "\n\nYour One-Time Password (OTP) is: " + otp 
+	            + "\n\nPlease enter it on the password reset page."
+	            + "\n\nIf you did not request a password reset, please ignore this email."
+	            + "\n\nSincerely,\nThe RP Digital Bank Team");
+	    return "resetPassword";
 	}
 
-	@GetMapping("/resetPassword")
-	public String showResetPassword(@RequestParam(value = "id", required = false) Integer id, Model model) {
-		if (id == null) {
-			model.addAttribute("error", "Invalid member ID");
-			return "forget"; // Redirect back to the forget password page
-		}
-		Member member = memberRepository.getReferenceById(id);
-		if (member == null) {
-			model.addAttribute("error", "Member not found");
-			return "forget";
-		}
-		model.addAttribute("member", member);
-		return "resetPassword";
-	}
+    @GetMapping("/forget")
+    public String showForgetPasswordPage(Model model) {
+        model.addAttribute("member", new Member());
+        return "forget";
+    }
 
-	@PostMapping("/resetPassword")
-	public String resetPassword(@RequestParam("id") Integer id, @RequestParam("password") String password,
-			@RequestParam("confirmPassword") String confirmPassword, Model model) {
-		if (!password.equals(confirmPassword)) {
-			model.addAttribute("error", "Passwords do not match");
-			model.addAttribute("member", memberRepository.getReferenceById(id));
-			return "resetPassword";
-		}
+    @PostMapping("/resetPassword")
+    public String resetPassword(@RequestParam("enteredOtp") String enteredOtp,
+                                @RequestParam("password") String password,
+                                @RequestParam("confirmPassword") String confirmPassword,
+                                HttpSession session, Model model) {
 
-		Member member = memberRepository.getReferenceById(id);
-		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		String encodedPassword = passwordEncoder.encode(password);
-		member.setPassword(encodedPassword);
-		memberRepository.save(member);
+        String storedOtp = (String) session.getAttribute("otp");
+        Integer memberId = (Integer) session.getAttribute("memberId");
 
-		return "redirect:/login";
-	}
+        if (storedOtp == null) { 
+            model.addAttribute("otpError", "Invalid or expired OTP.");
+            return "resetPassword";
+        }
+
+        if (!password.equals(confirmPassword)) {
+            model.addAttribute("error", "Passwords do not match");
+            return "resetPassword";
+        }
+
+        Member member = memberRepository.getReferenceById(memberId);
+
+        if (member == null) {
+            model.addAttribute("error", "Invalid member");
+            return "forget";
+        }
+
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        String encodedPassword = passwordEncoder.encode(password);
+        member.setPassword(encodedPassword);
+        memberRepository.save(member);
+
+        session.removeAttribute("otp");
+        session.removeAttribute("memberId");
+        return "redirect:/login";
+    }
+
+
 }

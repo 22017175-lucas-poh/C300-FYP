@@ -30,4 +30,8 @@ public class HomeController {
 		public String error403() {
 			return"403";
 		}
+		@GetMapping("/contact")
+		public String contact() {
+			return"contact";
+		}
 }

@@ -1,122 +1,163 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RP Digital Bank - Home</title>
+    <title>RP Digital Bank</title>
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
-    <script src="/bootstrap/js/bootstrap.min.js"></script>
-    
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
     <!-- Custom Styles -->
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fc;
             color: #333;
         }
-        .hero-section {
-            background: linear-gradient(to right, #4e73df, #1cc88a);
+
+        /* Header */
+        header {
+            background-color: #4e73df;
             color: white;
-            padding: 50px 20px;
+            padding: 20px 0;
+        }
+        header nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+        }
+        header nav a:hover {
+            text-decoration: underline;
+        }
+
+        /* Hero Section */
+        .hero {
             text-align: center;
+            padding: 100px 20px;
+            background: linear-gradient(to bottom right, #4e73df, #1cc88a);
+            color: white;
         }
-        .hero-section h1 {
-            font-size: 3rem;
-            margin-bottom: 20px;
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: bold;
         }
-        .features {
-            padding: 40px 20px;
+        .hero p {
+            font-size: 1.25rem;
+            margin: 20px 0 30px;
         }
-        .feature-card {
-            border: none;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s ease-in-out;
-        }
-        .feature-card:hover {
-            transform: translateY(-5px);
-        }
-        .cta-section {
+        .hero a {
+            padding: 10px 30px;
             background-color: #1cc88a;
             color: white;
-            padding: 40px 20px;
+            font-weight: bold;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .hero a:hover {
+            background-color: #17a673;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 50px 20px;
+        }
+        .features h2 {
             text-align: center;
+            color: #4e73df;
+            margin-bottom: 30px;
         }
-        .cta-section h2 {
-            margin-bottom: 20px;
+        .features .card {
+            border: none;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            transition: transform 0.3s ease;
         }
+        .features .card:hover {
+            transform: translateY(-10px);
+        }
+
+        /* Footer */
         footer {
             background-color: #333;
             color: white;
-            padding: 20px 0;
+            padding: 30px 0;
             text-align: center;
         }
-
-        /* Custom Style for Button Text */
-        .btn-light-black-text {
-            color: black !important; /* Set button text to black */
+        footer a {
+            color: #1cc88a;
+            text-decoration: none;
+            margin: 0 10px;
         }
-        .btn-light-black-text:hover {
-            color: black !important; /* Ensure text remains black on hover */
+        footer a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <div class="container-fluid">
-        <!-- Header -->
-        <div th:replace="fragments/header"></div>
-
-        <!-- Hero Section -->
-        <div class="hero-section">
-            <h1>Welcome to RP Digital Bank!</h1>
-            <p>Fast. Secure. Reliable. Manage your finances with confidence.</p>
-            <a href="/login" class="btn btn-light btn-lg btn-light-black-text">Get Started</a>
+    <!-- Header -->
+    <header>
+        <div class="container d-flex justify-content-between align-items-center">
+            <img src="images/Rp_logo.png" alt="RP Digital Bank Logo" style="max-height: 50px;">
+            <nav>
+                <a href="/">Home</a>
+                <a href="/consultations">Consultations</a>
+                <a href="/contact">Contact Us</a>
+                <a href="/login">Login</a>
+            </nav>
         </div>
+    </header>
 
-        <!-- Features Section -->
-        <div class="features container my-5">
-            <div class="row text-center">
-                <div class="col-md-4">
-                    <div class="card feature-card p-4">
-                        <img src="images/easybank.png" alt="Easy Banking" class="card-img-top mx-auto" style="width: 50px;">
-                        <div class="card-body">
-                            <h5 class="card-title">Easy Banking</h5>
-                            <p class="card-text">Access your account anytime, anywhere with our user-friendly platform.</p>
-                        </div>
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Welcome to RP Digital Bank</h1>
+        <p>Your one-stop solution for modern digital banking services.</p>
+        <a href="/login">Get Started</a>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features container my-5">
+        <h2>Our Features</h2>
+        <div class="row text-center">
+            <div class="col-md-4">
+                <div class="card p-4 mb-4">
+                    <img src="images/easybank.png" alt="Account Management" class="card-img-top">
+                    <div class="card-body">
+                        <h5 class="card-title">Account Management</h5>
+                        <p class="card-text">Easily manage your accounts, check balances, and review transactions.</p>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card feature-card p-4">
-                        <img src="images/secure.png" alt="Secure Transactions" class="card-img-top mx-auto" style="width: 50px;">
-                        <div class="card-body">
-                            <h5 class="card-title">Secure Transactions</h5>
-                            <p class="card-text">Your security is our priority. Bank with peace of mind.</p>
-                        </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-4 mb-4">
+                    <img src="images/247support.png" alt="Video Consultation" class="card-img-top">
+                    <div class="card-body">
+                        <h5 class="card-title">Video Consultations</h5>
+                        <p class="card-text">Connect with our experts through secure video consultations.</p>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card feature-card p-4">
-                        <img src="images/247support.png" alt="24/7 Support" class="card-img-top mx-auto" style="width: 50px;">
-                        <div class="card-body">
-                            <h5 class="card-title">24/7 Support</h5>
-                            <p class="card-text">Need help? Our support team is here for you anytime.</p>
-                        </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-4 mb-4">
+                    <img src="images/secure.png" alt="Secure Banking" class="card-img-top">
+                    <div class="card-body">
+                        <h5 class="card-title">Secure Banking</h5>
+                        <p class="card-text">Your data is protected with industry-leading security protocols.</p>
                     </div>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- Call to Action Section -->
-        <div class="cta-section">
-            <h2>Ready to Take Control of Your Finances?</h2>
-            <a href="/register" class="btn btn-light btn-lg btn-light-black-text">Open an Account Today</a>
-        </div>
-
-        <!-- Footer -->
-        <footer>
-            <div th:replace="fragments/footer"></div>
-        </footer>
-    </div>
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 RP Digital Bank. All rights reserved.</p>
+        <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
+    </footer>
 </body>
 </html>

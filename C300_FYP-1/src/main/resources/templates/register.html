@@ -1,59 +1,73 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>RP Digital Bank - Register A New Account</title>
-    <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}">
-    <script th:src="@{/bootstrap/js/bootstrap.min.js}"></script>
-    <style>
-        .btn-primary.important {
-            margin-bottom: 20px;
-        }
-    </style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>RP digital Bank - Register A New Account</title>
+<link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+<script src="/bootstrap/js/bootstrap.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <div th:replace="fragments/header"></div>
-        <main>
-            <form th:action="@{/register}" method="post" th:object="${member}">
-                <h1 class="text-center">Welcome to RP Digital Bank</h1>
-                <p class="text-muted text-center">Create a new account</p>
+	<div class="container">
+		<div th:replace="fragments/header"></div>
+		<main>
+			<form th:action="@{/register}" method="post" th:object="${member}">
+				<h1 class="text-center">Welcome to RP Digital Bank</h1>
+				<p class="text-muted text-center">Create a new account</p>
 
-                <div th:if="${param.error}" class="alert alert-danger mb-3">
-                    <strong>Error:</strong> Invalid registration details.
+				<div th:if="${param.error}" class="alert alert-danger">
+					<strong>Error:</strong> Invalid registration details.
+				</div>
+
+				<div class="mb-3 col-5">
+					<label for="member_name" class="form-label">Member Name:</label> 
+					<input id="member_name" type="text" class="form-control" th:field="*{name}" required />
+					<div class="invalid-feedback">Please enter a valid Name.</div>
+					<p class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+				</div>
+
+				<!-- Username -->
+				<div class="mb-3 col-5">
+					<label for="member_username" class="form-label">Username:</label> 
+					<input id="member_username" type="text" class="form-control" th:field="*{username}" required />
+					<div class="invalid-feedback">Please enter a Username.</div>
+					<p class="text-danger" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></p>
+				</div>
+
+				<!-- Password -->
+				<div class="mb-3 col-5">
+					<label for="member_password" class="form-label">Password:</label> 
+					<input id="member_password" type="password" class="form-control" th:field="*{password}" required />
+					<div class="invalid-feedback">Please enter a valid Password.</div>
+					<p class="text-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+				</div>
+				
+				<!-- Email -->
+				<div class="mb-3 col-5">
+                    <label for="member_email" class="form-label">Email:</label>
+                    <input id="member_email" type="email" class="form-control" th:field="*{email}" required />
+                    <div class="invalid-feedback">Please enter a valid Email.</div>
+                    <p class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
                 </div>
 
-                <div class="form-group mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" class="form-control" id="username" name="username" required />
-                </div>
+				<!-- NRIC -->
+				<div class="mb-3 col-5">
+					<label for="nric" class="form-label">NRIC</label> 
+					<input id="nric" type="text" class="form-control" th:field="*{nric}" required />
+					<div class="invalid-feedback">Please enter a valid NRIC</div>
+					<p class="text-danger" th:if="${#fields.hasErrors('nric')}" th:errors="*{nric}"></p>
+				</div>
+				
+				<div class="text-center">
+					<button type="submit" class="btn btn-primary">Register</button>
+				</div>
+			</form>
 
-                <div class="form-group mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" required />
-                </div>
+			<!-- Back to Login Button -->
+			<div class="text-center mt-3">
+				<a href="/login" class="btn btn-secondary">Back to Login</a>
+			</div>
 
-                <div class="form-group mb-3">
-                    <label for="name" class="form-label">Name</label>
-                    <input type="text" class="form-control" id="name" name="name" required />
-                </div>
-
-                <div class="form-group mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="text" class="form-control" id="email" name="email" required />
-                </div>
-
-                <div class="form-group mb-3">
-                    <label for="nric" class="form-label">NRIC</label>
-                    <input type="text" class="form-control" id="nric" name="nric" 
-                           pattern="[A-Za-z][0-9]{7}[A-Za-z]" required />
-                </div>
-
-                <div class="text-center">
-                    <button type="submit" class="btn btn-primary important mb-3">Register</button>
-                </div>
-            </form>
-        </main>
-    </div>
+		</main>
+	</div>
 </body>
 </html>
