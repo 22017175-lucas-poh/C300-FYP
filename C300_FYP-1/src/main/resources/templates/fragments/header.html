@@ -158,7 +158,8 @@ nav .navbar-brand img {
 	 <div class="off-screen-menu">
         <a href="/">Home</a>
         <a href="/Card">Manage Card</a> 
-        <a href="/consultations">Book Consultation</a>
+        <a href="/Account">Manage Accounts</a>
+        <a href="/consultations">Book Consultation</a>        
         <a href="/Admin/Card" sec:authorize="hasAnyRole('ROLE_BO', 'ROLE_FA')">Manage Card</a>
         <a href="/Admin/consultations" sec:authorize="hasRole('ROLE_FA')">Manage Consultations</a>
         <a href="/Member" sec:authorize="hasRole('ROLE_BO')">Manage Member</a>

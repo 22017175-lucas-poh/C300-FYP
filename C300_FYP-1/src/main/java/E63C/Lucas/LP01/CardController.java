@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.Authentication;
@@ -27,7 +28,10 @@ public class CardController {
 
 //	@Autowired
 //	private PendingCardRepository pendingCardRepository;
-
+//	@Autowired
+//	private MemberService memberService;
+	@Autowired
+    private cardService cardService; // Inject CardService here
 	@Autowired
 	private AccountTypeRepository accountRepository;
 	@Autowired
@@ -56,12 +60,11 @@ public class CardController {
 
 	@GetMapping("/Card/add")
 	public String addCard(Model model) {
-	    model.addAttribute("card", new Card());  // Empty Card object for form binding
-	    List<Card_type> cardTypeList = cardTypeRepository.findAll();  // Get list of CardType from DB
-	    model.addAttribute("cardTypeList", cardTypeList);  // Add CardType list to the model
-	    return "AddCard"; // Page for adding a new card
+		model.addAttribute("card", new Card()); // Empty Card object for form binding
+		List<Card_type> cardTypeList = cardTypeRepository.findAll(); // Get list of CardType from DB
+		model.addAttribute("cardTypeList", cardTypeList); // Add CardType list to the model
+		return "AddCard"; // Page for adding a new card
 	}
-
 
 	@PostMapping("/Card/save")
 	public String saveCard(@ModelAttribute Card card, Model model) {
@@ -108,14 +111,15 @@ public class CardController {
 	    }
 
 	    // Check for duplicate card number
-	    List<Card> existingCardNumbers = cardRepository.findByCardNumber(card.getCardNumber());
-	    if (!existingCardNumbers.isEmpty()) {
+	    // We are now checking if the card number already exists in the database
+	    Card existingCard = cardRepository.findFirstByCardNumber(card.getCardNumber());
+	    if (existingCard != null) {
 	        model.addAttribute("duplicateCard_Error", true);
-	        
-	        // Replace accountTypeList with cardTypeList
+
+	        // Get list of card types for display in case of error
 	        List<Card_type> cardTypeList = cardTypeRepository.findAll();
-	        model.addAttribute("cardTypeList", cardTypeList); // Adding CardType list to the model
-	        
+	        model.addAttribute("cardTypeList", cardTypeList);
+
 	        model.addAttribute("card", card); // Passing the card with all its data
 	        return "AddCard"; // Return to add card page if duplicate is found
 	    }
@@ -126,20 +130,16 @@ public class CardController {
 	    // Send email to admin
 	    String adminEmail = "lucaspoh7@gmail.com";
 	    String subject = "Card Application Received";
-	    String body = "A new card has been applied with the following details:\n" + 
-	                  "Card Number: " + card.getCardNumber() + "\n" + 
-	                  "Card Type: " + card.getCardType().getName() + "\n" +  // Changed AccountType to CardType
-	                  "CVV/CVC: " + card.getCVV() + "\n" + 
-	                  "Expiry Date: " + card.getExpiryDate() + "\n" + 
-	                  "Bank Name: " + card.getBankName() + "\n\n" + 
-	                  "Please review this application.";
+	    String body = "A new card has been applied with the following details:\n" + "Card Number: "
+	            + card.getCardNumber() + "\n" + "Card Type: " + card.getCardType().getName() + "\n" + // Changed AccountType to CardType
+	            "CVV/CVC: " + card.getCVV() + "\n" + "Expiry Date: " + card.getExpiryDate() + "\n" + "Bank Name: "
+	            + card.getBankName() + "\n\n" + "Please review this application.";
 
 	    sendEmail(adminEmail, subject, body);
 
 	    // Redirect to the success page
 	    return "redirect:/Card"; // Redirect to the list or another page
 	}
-
 
 	@GetMapping("/Admin/Card")
 	public String viewAllCards(Model model) {
@@ -175,19 +175,20 @@ public class CardController {
 
 	@GetMapping("/Admin/Card/Edit/{id}")
 	public String editCard(@PathVariable("id") Integer id, Model model) {
-	    // Fetch the card by its ID
-	    Card card = cardRepository.findById(id).orElse(null);
-	    if (card == null) return "redirect:/Admin/Card"; // If card is not found, redirect to the card list.
+		// Fetch the card by its ID
+		Card card = cardRepository.findById(id).orElse(null);
+		if (card == null)
+			return "redirect:/Admin/Card"; // If card is not found, redirect to the card list.
 
-	    // Add the card object to the model
-	    model.addAttribute("card", card);
+		// Add the card object to the model
+		model.addAttribute("card", card);
 
-	    // Fetch all card types and pass them to the view
-	    List<Card_type> cardTypeList = cardTypeRepository.findAll();
-	    model.addAttribute("cardTypeList", cardTypeList); // Correct attribute name to match your form.
+		// Fetch all card types and pass them to the view
+		List<Card_type> cardTypeList = cardTypeRepository.findAll();
+		model.addAttribute("cardTypeList", cardTypeList); // Correct attribute name to match your form.
 
-	    // Return the "EditCard" view for editing the selected card
-	    return "EditCard";
+		// Return the "EditCard" view for editing the selected card
+		return "EditCard";
 	}
 
 	@PostMapping("/Admin/Card/Edit/{id}")
@@ -217,46 +218,72 @@ public class CardController {
 
 		return "redirect:/Admin/Card";
 	}
-
 	@GetMapping("/Card/Balance/View/{id}")
 	public String viewBalance(@PathVariable("id") String cardNumber, Model model) {
-		try {
-			int cardNumberInt = Integer.parseInt(cardNumber);
+	    try {
+	        int cardNumberInt = Integer.parseInt(cardNumber); // Parse card number from the path variable
 
-			// Fetch the list of cards matching the card number
-			List<Card> cards = cardRepository.findByCardNumber(cardNumberInt);
+	        // Fetch the list of cards matching the card number
+	        List<Card> cards = cardRepository.findByCardNumber(cardNumberInt); // Returns List<Card>
 
-			if (cards.isEmpty()) {
-				model.addAttribute("error", "Card not found.");
-				return "redirect:/Card";
-			}
+	        if (cards.isEmpty()) {
+	            model.addAttribute("error", "Card not found.");
+	            return "redirect:/Card";
+	        }
 
-			// Handle multiple matches (e.g., show the first card or prompt user to choose)
-			Card card = cards.get(0);
+	        // Now, extract the first card from the list if it exists
+	        Card card = cards.get(0); // Correctly fetching a single Card from the list
 
-			// Add balance and card details to the model
-			model.addAttribute("card", card);
-			model.addAttribute("balance", card.getBalance());
+	        // Add the card and balance to the model
+	        model.addAttribute("card", card); // Passing the card details
+	        model.addAttribute("balance", card.getBalance()); // Adding the card balance
 
-			return "ViewBalance"; // Return the balance view page
-		} catch (NumberFormatException e) {
-			model.addAttribute("error", "Invalid card number.");
-			return "redirect:/Card";
-		}
+	        return "ViewBalance"; // Returning the balance view page
+	    } catch (NumberFormatException e) {
+	        model.addAttribute("error", "Invalid card number.");
+	        return "redirect:/Card"; // Redirecting back if the card number is invalid
+	    }
 	}
+//	 @PostMapping("/updateBalance")
+//	    public ResponseEntity<Map<String, Object>> updateBalance(@RequestBody Map<String, Object> requestData) {
+//	        String cardNumber = (String) requestData.get("cardNumber");
+//	        String transactionId = (String) requestData.get("transactionId");
+//	        Double amountToAdjust = (Double) requestData.get("amountToAdjust");
+//
+//	        boolean success = cardService.updateBalance(cardNumber, amountToAdjust); // Method to update balance in your service
+//
+//	        Map<String, Object> response = new HashMap<>();
+//	        response.put("success", success);
+//	        return ResponseEntity.ok(response);
+//	    }
+	@PostMapping("/CardController/updateBalance")
+	public ResponseEntity<?> updateBalance(@RequestParam String cardNumber,
+	                                       @RequestParam Double amount,
+	                                       @RequestParam String transactionId) {
+	    // Handle the data here
+	    System.out.println("Card Number: " + cardNumber);
+	    System.out.println("Amount: " + amount);
+	    System.out.println("Transaction ID: " + transactionId);
+	    return ResponseEntity.ok().build();
+	}
+
+
+
+
+
 	@PostMapping("/Card/cancel/{id}")
 	public String cancelCard(@PathVariable("id") Integer cardId) {
-	    // Fetch the card by its ID
-	    Card card = cardRepository.findById(cardId).orElse(null);
-	    
-	    // Check if the card exists and update the status to CANCELLED_PENDING
-	    if (card != null) {
-	        card.setStatus(Card.CardStatus.CANCELLED_PENDING); // Set the status to CANCELLED_PENDING
-	        cardRepository.save(card); // Save the updated card
-	    }
-	    
-	    // Redirect to the card list or the appropriate page
-	    return "redirect:/Card"; 
+		// Fetch the card by its ID
+		Card card = cardRepository.findById(cardId).orElse(null);
+
+		// Check if the card exists and update the status to CANCELLED_PENDING
+		if (card != null) {
+			card.setStatus(Card.CardStatus.CANCELLED_PENDING); // Set the status to CANCELLED_PENDING
+			cardRepository.save(card); // Save the updated card
+		}
+
+		// Redirect to the card list or the appropriate page
+		return "redirect:/Card";
 	}
 
 	@PostMapping("/Admin/Card/Cancel/Approve/{id}")
@@ -268,16 +295,35 @@ public class CardController {
 		}
 		return "redirect:/Admin/Card"; // Redirect to view the updated list
 	}
+
 	@PostMapping("/Admin/Card/Cancel/Reject/{id}")
 	public String rejectCancellation(@PathVariable("id") Integer cardId) {
 		Card card = cardRepository.findById(cardId).orElse(null);
 		if (card != null && card.getStatus() == CardStatus.CANCELLED_PENDING) {
-			card.setStatus(CardStatus.APPROVED); // Update status to APPROVED again 
+			card.setStatus(CardStatus.APPROVED); // Update status to APPROVED again
 			cardRepository.save(card); // Save the updated card
 		}
 		return "redirect:/Admin/Card"; // Redirect to view the updated list
 	}
 
+	/**
+     * Update the balance of a card using its card number.
+     *
+     * @param request Contains card number, transaction ID, and the amount to update.
+     * @return Response indicating success or failure.
+     */
+//	 @GetMapping("/updateBalance")
+//	    public String updateBalance(@RequestParam int cardNumber, @RequestParam double newBalance, Model model) {
+//	        // Update card balance
+//	        cardService.updateCardBalance(cardNumber, newBalance);
+//	        
+//	        // Fetch updated card info and display it
+//	        Card updatedCard = cardService.findCardByNumber(cardNumber);
+//	        model.addAttribute("card", updatedCard);
+//	        
+//	        return "cardDetails"; // The view name to display the updated details
+//	    }
+	
 
 	public void sendEmail(String to, String subject, String body) {
 		try {

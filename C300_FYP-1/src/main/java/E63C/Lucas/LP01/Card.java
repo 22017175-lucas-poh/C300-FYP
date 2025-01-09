@@ -141,6 +141,36 @@ public class Card {
 	public void setBalance(double balance) {
 		this.balance = balance;
 	}
+	public class BalanceUpdateRequest {
+	    private int cardNumber; // Card number for lookup
+	    private String transactionId; // Transaction ID for logging or auditing
+	    private double amount; // Amount to add to the balance
+
+	    // Getters and setters
+	    public int getCardNumber() {
+	        return cardNumber;
+	    }
+
+	    public void setCardNumber(int cardNumber) {
+	        this.cardNumber = cardNumber;
+	    }
+
+	    public String getTransactionId() {
+	        return transactionId;
+	    }
+
+	    public void setTransactionId(String transactionId) {
+	        this.transactionId = transactionId;
+	    }
+
+	    public double getAmount() {
+	        return amount;
+	    }
+
+	    public void setAmount(double amount) {
+	        this.amount = amount;
+	    }
+	}
 
 
 	// Enum for card status

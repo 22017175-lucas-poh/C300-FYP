@@ -10,18 +10,30 @@
  * Date created: 2024-Nov-06 7:34:52 pm 
  * 
  */
-
 package E63C.Lucas.LP01;
 
 import java.util.List;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CardRepository extends JpaRepository<Card, Integer> {
+
+    // Find cards by associated member
+
+    // Find cards by card number (assuming card number is a String)
+//    List<Card> findByCardNumber(String cardNumber); // Change to String if cardNumber is a String
+    List<Card> findByCardNumber(int cardNumber);  // Use this if cardNumber is stored as int
+
+    // Find cards by status
+    List<Card> findByStatus(Card.CardStatus status); // Use CardStatus enum directly
+
+    // Find a card by memberId (assuming a one-to-one relationship between member and card)
+//    Card findByCardNumber(int cardNumber); 
     List<Card> findByMember(Member member);
 
-    List<Card> findByCardNumber(int cardNumber);
+	/**
+	 * @param cardNumber
+	 * @return
+	 */
+	Card findFirstByCardNumber(int cardNumber);
 
-    // Update the method to use CardStatus
-    List<Card> findByStatus(Card.CardStatus status); // Use CardStatus enum directly
 }
