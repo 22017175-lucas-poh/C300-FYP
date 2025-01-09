@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.Authentication;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.view.RedirectView;
 
 import E63C.Lucas.LP01.Card.CardStatus;
 
@@ -257,14 +257,32 @@ public class CardController {
 //	        return ResponseEntity.ok(response);
 //	    }
 	@PostMapping("/CardController/updateBalance")
-	public ResponseEntity<?> updateBalance(@RequestParam String cardNumber,
-	                                       @RequestParam Double amount,
-	                                       @RequestParam String transactionId) {
-	    // Handle the data here
+	public RedirectView updateBalance(@RequestParam int cardNumber,
+	                                   @RequestParam Double amount,
+	                                   @RequestParam String transactionId) {
+	    // Find the card by card number
+	    Card card = cardRepository.findFirstByCardNumber(cardNumber);
+
+	    // If card is not found, handle error (optional)
+	    if (card == null) {
+	        return new RedirectView("/errorPage");  // You can define an error page
+	    }
+
+	    // Update balance
+	    Double updatedBalance = card.getBalance() + amount;
+	    card.setBalance(updatedBalance);
+
+	    // Save the updated card back to the database
+	    cardRepository.save(card);
+
+	    // Log transaction details (for debugging purposes)
 	    System.out.println("Card Number: " + cardNumber);
 	    System.out.println("Amount: " + amount);
 	    System.out.println("Transaction ID: " + transactionId);
-	    return ResponseEntity.ok().build();
+	    System.out.println("Updated Balance: " + updatedBalance);
+
+	    // Redirect back to the card page after successful update
+	    return new RedirectView("/Card"); // might change the redirection link to a Success.html page if have time to create.
 	}
 
 
