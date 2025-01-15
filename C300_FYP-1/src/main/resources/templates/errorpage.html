@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Error Page</title>
+<div class="container">
+
+	<div th:replace="fragments/header"></div>
+</head>
+		<div class="mb-3">
+
+<body>
+	<h1>An error occurred</h1>
+	<p th:text="${message}"></p>
+	<a href="/">Go to Home</a>
+</body>
+</html>

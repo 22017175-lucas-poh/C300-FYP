@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
 
 import E63C.Lucas.LP01.Card.CardStatus;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class CardController {
@@ -128,7 +129,7 @@ public class CardController {
 	    cardRepository.save(card);
 
 	    // Send email to admin
-	    String adminEmail = "lucaspoh7@gmail.com";
+	    String adminEmail = "musashibestgirl990@gmail.com";
 	    String subject = "Card Application Received";
 	    String body = "A new card has been applied with the following details:\n" + "Card Number: "
 	            + card.getCardNumber() + "\n" + "Card Type: " + card.getCardType().getName() + "\n" + // Changed AccountType to CardType
@@ -244,18 +245,7 @@ public class CardController {
 	        return "redirect:/Card"; // Redirecting back if the card number is invalid
 	    }
 	}
-//	 @PostMapping("/updateBalance")
-//	    public ResponseEntity<Map<String, Object>> updateBalance(@RequestBody Map<String, Object> requestData) {
-//	        String cardNumber = (String) requestData.get("cardNumber");
-//	        String transactionId = (String) requestData.get("transactionId");
-//	        Double amountToAdjust = (Double) requestData.get("amountToAdjust");
-//
-//	        boolean success = cardService.updateBalance(cardNumber, amountToAdjust); // Method to update balance in your service
-//
-//	        Map<String, Object> response = new HashMap<>();
-//	        response.put("success", success);
-//	        return ResponseEntity.ok(response);
-//	    }
+
 	@PostMapping("/CardController/updateBalance")
 	public RedirectView updateBalance(@RequestParam int cardNumber,
 	                                   @RequestParam Double amount,
@@ -285,25 +275,111 @@ public class CardController {
 	    return new RedirectView("/Card"); // might change the redirection link to a Success.html page if have time to create.
 	}
 
+	
 
+	@GetMapping("/Card/cancelPage")
+	public String showCancelPage(HttpSession session, Model model) {
+	    Integer cardId = (Integer) session.getAttribute("cardId");
 
+	    if (cardId != null) {
+	        Card card = cardRepository.findById(cardId).orElse(null);
+	        if (card != null) {
+	            model.addAttribute("card", card);
+	            return "cancelPage"; // Return the cancel page view
+	        }
+	    }
 
-
-	@PostMapping("/Card/cancel/{id}")
-	public String cancelCard(@PathVariable("id") Integer cardId) {
-		// Fetch the card by its ID
-		Card card = cardRepository.findById(cardId).orElse(null);
-
-		// Check if the card exists and update the status to CANCELLED_PENDING
-		if (card != null) {
-			card.setStatus(Card.CardStatus.CANCELLED_PENDING); // Set the status to CANCELLED_PENDING
-			cardRepository.save(card); // Save the updated card
-		}
-
-		// Redirect to the card list or the appropriate page
-		return "redirect:/Card";
+	    model.addAttribute("message", "Session expired or invalid card details.");
+	    return "errorPage"; // Redirect to an error page
 	}
 
+	@PostMapping("/Card/cancel/{id}")
+	public String cancelCard(@PathVariable("id") Integer cardId, Model model, HttpSession session) {
+	    Card card = cardRepository.findById(cardId).orElse(null);
+
+	    if (card != null) {
+	        // Get the current logged-in user
+	        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+	        String username = authentication.getName(); // Get the current username
+
+	        // Fetch the member from the repository
+	        Member member = memberRepository.findByUsername(username); 
+
+	        // Generate OTP
+	        String otpString = generateOTP(); 
+
+	        // Store the OTP and cardId in the session
+	        session.setAttribute("generatedOTP", otpString);
+	        session.setAttribute("otpTimestamp", System.currentTimeMillis()); 
+	        session.setAttribute("cardId", cardId); // Save cardId in session
+
+	        // Send OTP to the member's email
+	        String customerEmail = member.getEmail(); // Get the email from the member object
+	        String subject = "Your OTP for Card Cancellation Request";
+	        String body = "Dear customer,\n\n" +
+	                      "You requested to cancel your card. Please use the following OTP to confirm your request:\n" +
+	                      "OTP: " + otpString + "\n\n" +
+	                      "If you did not request this, please ignore this email.";
+
+	        sendEmail(customerEmail, subject, body); // Your method to send the email
+
+	        // Redirect to the Cancel Page
+	        model.addAttribute("card", card); // Add card details to the model
+	        return "redirect:/Card/cancelPage"; // Redirect to the Cancel Page
+	    }
+
+	    return "redirect:/Card"; // If card not found, redirect to the card list
+	}
+
+
+
+    private boolean validateOTP(String otp, HttpSession session) {
+        // Retrieve the OTP from the session (assuming it was stored there earlier)
+        String generatedOTP = (String) session.getAttribute("generatedOTP");
+
+        // Validate if the OTP entered by the user matches the one stored in the session
+        return generatedOTP != null && generatedOTP.equals(otp);
+    }
+
+    @PostMapping("/Card/otp/verify")
+    public String verifyOTP(@RequestParam("otp") String otp, Model model, HttpSession session) {
+        // Validate the OTP
+        boolean isValidOTP = validateOTP(otp, session);
+
+        if (isValidOTP) {
+            // Proceed with card cancellation if OTP is valid
+            Integer cardId = (Integer) session.getAttribute("cardId");
+            if (cardId != null) {
+                Card card = cardRepository.findById(cardId).orElse(null);
+                if (card != null) {
+                    // Update card status and save
+                    card.setStatus(Card.CardStatus.CANCELLED_PENDING); // Example enum for status
+                    cardRepository.save(card);
+                    model.addAttribute("message", "Your card cancellation request is now pending.");
+                    return "confirmationPage"; // Redirect to confirmation page
+                }
+            }
+        } else {
+            // Handle invalid OTP
+            model.addAttribute("otpError", "Invalid OTP. Please try again.");
+            model.addAttribute("isOtpVisible", true); // Keep OTP form visible
+            return "cancelPage"; // Return to the cancelCard page with error
+        }
+        return "redirect:/Card"; // Default redirect if something unexpected happens
+    }
+
+
+
+
+
+
+    // Utility method to generate OTP
+    private String generateOTP() {
+        Random rand = new Random();
+        int otp = 100000 + rand.nextInt(900000);  // Generate a 6-digit OTP
+        return String.valueOf(otp);
+    }	
+	
 	@PostMapping("/Admin/Card/Cancel/Approve/{id}")
 	public String approveCancellation(@PathVariable("id") Integer cardId) {
 		Card card = cardRepository.findById(cardId).orElse(null);
@@ -324,24 +400,7 @@ public class CardController {
 		return "redirect:/Admin/Card"; // Redirect to view the updated list
 	}
 
-	/**
-     * Update the balance of a card using its card number.
-     *
-     * @param request Contains card number, transaction ID, and the amount to update.
-     * @return Response indicating success or failure.
-     */
-//	 @GetMapping("/updateBalance")
-//	    public String updateBalance(@RequestParam int cardNumber, @RequestParam double newBalance, Model model) {
-//	        // Update card balance
-//	        cardService.updateCardBalance(cardNumber, newBalance);
-//	        
-//	        // Fetch updated card info and display it
-//	        Card updatedCard = cardService.findCardByNumber(cardNumber);
-//	        model.addAttribute("card", updatedCard);
-//	        
-//	        return "cardDetails"; // The view name to display the updated details
-//	    }
-	
+
 
 	public void sendEmail(String to, String subject, String body) {
 		try {

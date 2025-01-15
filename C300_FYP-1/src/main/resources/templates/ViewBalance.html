@@ -1,89 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rp Digital Bank - View Card Balance</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://www.paypal.com/sdk/js?client-id=AYn_nV5_8ghOSsafDXz9f5PsBvUzIJ6FOHiSnQOBKGe5a_7PQnElUIWcuMYkRZphoEu1zKWyVSXHH8xl&currency=SGD&components=buttons"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rp Digital Bank - View Card Balance</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script
+	src="https://www.paypal.com/sdk/js?client-id=AYn_nV5_8ghOSsafDXz9f5PsBvUzIJ6FOHiSnQOBKGe5a_7PQnElUIWcuMYkRZphoEu1zKWyVSXHH8xl&currency=SGD&components=buttons"></script>
 </head>
+
 <style>
-    .custom-green {
-        background-color: #28a745;
-    }
-    .btn-small {
-        padding: 5px 15px;
-        font-size: 1rem;
-    }
-    .gap-3 {
-        gap: 1rem;
-    }
-    #amountInput {
-        width: 120px;
-        text-align: center;
-    }
-    #subtractButton, #addButton {
-        width: 100px;
-    }
-    .pay-pal-small {
-        transform: scale(0.8);
-        transform-origin: center;
-    }
+.custom-green {
+	background-color: #28a745;
+}
+
+.btn-small {
+	padding: 5px 15px;
+	font-size: 1rem;
+}
+
+.gap-3 {
+	gap: 1rem;
+}
+
+#amountInput {
+	width: 120px;
+	text-align: center;
+}
+
+#subtractButton, #addButton {
+	width: 100px;
+	font-size: 1rem;
+	padding: 5px 15px;
+}
+
+.pay-pal-container {
+    display: flex;
+    justify-content: flex-start; /* Align the PayPal button to the left */
+    margin-left: -26px; /* Adjust this to move it slightly to the right */
+    width: 100%; /* Ensure full width container */
+    max-width: 600px; /* Limit maximum width of the container */
+    padding: 0;
+}
+
+.pay-pal-small {
+    transform: scale(2); /* Increase PayPal button size */
+    transform-origin: left;
+    width: 100%;
+    max-width: 600px; /* Limit maximum width of the PayPal button */
+}
 </style>
 
 <body>
-    <div class="container">
-        <div th:replace="fragments/header"></div>
+	<div class="container">
+		<div th:replace="fragments/header"></div>
 
-        <h1 class="mb-4">View Card Balance</h1>
+		<h1 class="mb-4">View Card Balance</h1>
 
-        <div class="card shadow-sm">
-            <div class="card-header custom-green text-white">
-                <h5 class="mb-0">Card Balance Details</h5>
-            </div>
+		<div class="card shadow-sm">
+			<div class="card-header custom-green text-white">
+				<h5 class="mb-0">Card Balance Details</h5>
+			</div>
 
-            <div class="card-body">
-                <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+			<div class="card-body">
+				<!-- Display error if any -->
+				<div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-                <!-- Card Number -->
-                <div class="mb-3">
-                    <label class="form-label">Card Number:</label>
-                    <div class="form-control bg-light" th:text="${card.cardNumber}"></div>
-                </div>
+				<!-- Card Number -->
+				<div class="mb-3">
+					<label class="form-label">Card Number:</label>
+					<div class="form-control bg-light" th:text="${card.cardNumber}"></div>
+				</div>
 
-                <!-- Balance -->
-                <div class="mb-3">
-                    <label class="form-label">Balance:</label>
-                    <div class="form-control bg-light" id="currentBalance"
-                        th:text="'$' + ${card.balance}"></div>
-                </div>
+				<!-- Balance -->
+				<div class="mb-3">
+					<label class="form-label">Balance:</label>
+					<div class="form-control bg-light" id="currentBalance"
+						th:text="'$' + ${card.balance}"></div>
+				</div>
 
-                <label for="amount" class="form-label me-3">Adjust Balance:</label>
+				<label for="amount" class="form-label me-3">Adjust Balance:</label>
 
-                <div class="mb-3 d-flex justify-content-start align-items-center gap-3">
-                    <!-- Subtract Button -->
-                    <button type="button" class="btn btn-danger" id="subtractButton">- $10</button>
+				<div
+					class="mb-3 d-flex justify-content-start align-items-center gap-3">
+					<!-- Subtract Button -->
+					<button type="button" class="btn btn-danger" id="subtractButton">-
+						$10</button>
 
-                    <!-- Amount Input (Box) -->
-        <input type="number" id="amountInput" class="form-control" value="10" required min="0" />
+					<!-- Amount Input (Box) -->
+					<input type="number" id="amountInput" class="form-control"
+						value="10" required min="0" />
 
+					<!-- Add Button -->
+					<button type="button" class="btn btn-success" id="addButton">+ $10</button>
+				</div>
 
-                    <!-- Add Button -->
-                    <button type="button" class="btn btn-success" id="addButton">+ $10</button>
-                </div>
+				<!-- PayPal Button Container -->
+				<div class="pay-pal-container">
+					<!-- Assuming 'fragments/paypal' contains the PayPal button -->
+					<div th:replace="fragments/paypal" class="pay-pal-small"></div>
+				</div>
 
-                <!-- PayPal Button Integration -->
-                <div 	>						<div th:replace= "fragments/paypal"></div>
-</div>
+				<!-- Back Button -->
+				<a href="/Card" class="btn btn-secondary mt-3">Back to Cards</a>
+			</div>
+		</div>
+	</div>
 
-                <!-- Back Button -->
-                <a href="/Card" class="btn btn-secondary mt-3">Back to Cards</a>
-            </div>
-        </div>
-    </div>
-
-    <script>
+	<script>
         let adjustmentAmount = 10; // Initialize the adjustment amount
 
         // Function to update the adjusted amount in the input field

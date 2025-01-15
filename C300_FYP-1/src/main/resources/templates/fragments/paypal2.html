@@ -1,0 +1,52 @@
+<div class="row m-3 border-bottom fw-bold">
+    <div id="paypal-button-container"></div>
+
+    <!-- Hidden Form -->
+    <form th:action="@{/updateBalance}" method="post" id="paypalForm">
+        <input type="hidden" name="accountId" id="accountId" th:value="${account.id}">
+        <input type="hidden" name="transactionId" id="transactionId" />
+        <input type="hidden" name="amount" id="amount" />
+    </form>
+
+    <script src="https://www.paypal.com/sdk/js?client-id=AYn_nV5_8ghOSsafDXz9f5PsBvUzIJ6FOHiSnQOBKGe5a_7PQnElUIWcuMYkRZphoEu1zKWyVSXHH8xl&currency=SGD&components=buttons"></script>
+
+    <script>
+        paypal.Buttons({
+            createOrder: function(data, actions) {
+                var cartTotal = parseFloat(document.getElementById("amountInput").value);
+                if (isNaN(cartTotal) || cartTotal <= 0) {
+                    alert("Please enter a valid amount.");
+                    return;
+                }
+
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: cartTotal.toFixed(2)
+                        }
+                    }]
+                });
+            },
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    var orderId = details.id;
+                    var transactionId = details.purchase_units[0].payments.captures[0].id;
+                    var completedBy = details.payer.name.given_name;
+                    var transactionAmount = parseFloat(details.purchase_units[0].amount.value);
+
+                    // Set hidden input values for form submission
+                    document.getElementById("transactionId").value = transactionId;
+                    document.getElementById("amount").value = transactionAmount;
+
+                    // Submit the form to backend for processing the transaction
+                    document.getElementById("paypalForm").submit();
+
+                    console.log('Transaction completed by: ' + completedBy);
+                    console.log("Order ID: " + orderId);
+                    console.log("Transaction ID: " + transactionId);
+                    console.log("Full transaction details: " + JSON.stringify(details));
+                });
+            }
+        }).render('#paypal-button-container');
+    </script>
+</div>
