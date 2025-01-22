@@ -52,22 +52,48 @@
 </head>
 <body>
     <div class="container">
+        
         <div th:replace="fragments/header"></div>
         <h1>Book a Consultation</h1>
+        
+                <div th:if="${error}" class="alert alert-danger">
+            <p th:text="${error}"></p>
+        </div>
 
         <form th:action="@{/consultations/book/save}" method="post">
+            <!-- Date Field -->
             <div class="mb-3">
                 <label for="consultationDate" class="form-label">Consultation Date:</label>
                 <input type="date" class="form-control" id="consultationDate" name="consultationDate" required>
             </div>
             
+            <!-- Consultant Dropdown -->
             <div class="mb-3">
                 <label for="consultantName" class="form-label">Consultant Name:</label>
-                <input type="text" class="form-control" id="consultantName" name="consultantName" required>
+                <select class="form-control" id="consultantName" name="consultantName" required>
+                    <option th:each="consultant : ${consultants}" 
+                            th:value="${consultant.name}" 
+                            th:text="${consultant.name}" 
+                            th:if="${consultant.dateLeft == null}"></option>
+                </select>
             </div>
+
+<div class="mb-3">
+    <label for="consultationTime" class="form-label">Consultation Time:</label>
+    <select class="form-control" id="consultationTime" name="consultationTime" required>
+        <option value="10:00">10:00 AM</option>
+        <option value="11:00">11:00 AM</option>
+        <option value="12:00">12:00 PM</option>
+        <option value="13:00">1:00 PM</option>
+        <option value="14:00">2:00 PM</option>
+        <option value="15:00">3:00 PM</option>
+    </select>
+</div>
 
             <button type="submit" class="btn btn-primary">Book Consultation</button>
         </form>
     </div>
 </body>
 </html>
+
+

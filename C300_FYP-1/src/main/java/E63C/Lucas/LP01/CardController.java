@@ -1,10 +1,12 @@
 package E63C.Lucas.LP01;
 
+import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.Authentication;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
 
 import E63C.Lucas.LP01.Card.CardStatus;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -369,10 +372,6 @@ public class CardController {
     }
 
 
-
-
-
-
     // Utility method to generate OTP
     private String generateOTP() {
         Random rand = new Random();
@@ -399,6 +398,46 @@ public class CardController {
 		}
 		return "redirect:/Admin/Card"; // Redirect to view the updated list
 	}
+	
+	@GetMapping("/Admin/Card/Export")
+	public ResponseEntity<Void> exportCardsToCsv(HttpServletResponse response) {
+	    try {
+	        // Set response headers
+	        response.setContentType("text/csv");
+	        response.setHeader("Content-Disposition", "attachment; filename=cards.csv");
+
+	        // Retrieve card data (replace with your service/repository logic)
+	        List<Card> cards = cardRepository.findAll(); // Replace with cardService logic if applicable
+	        int cardCount = cards.size(); // Count the number of cards
+
+	        // Write CSV data
+	        PrintWriter writer = response.getWriter();
+	        writer.println("Card ID,Card Type,Card Number,CVV/CCV,Expiry Date,Bank Name,Status");
+
+	        for (Card card : cards) {
+	            writer.printf("%d,%s,%s,%s,%s,%s,%s%n",
+	                card.getId(),
+	                card.getCardType().getName(),
+	                card.getCardNumber(),
+	                card.getCVV(),
+	                card.getExpiryDate(),
+	                card.getBankName(),
+	                card.getStatus());
+	        }
+
+	        // Add a summary row with the count
+	        writer.println();
+	        writer.printf("Total Cards:,%d%n", cardCount); // Summary row
+
+	        writer.flush();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.internalServerError().build();
+	    }
+
+	    return ResponseEntity.ok().build();
+	}
+
 
 
 

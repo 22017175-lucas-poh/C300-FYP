@@ -75,7 +75,8 @@
             </thead>
             <tbody>
                 <th:block th:each="account : ${listAccounts}">
-                    <tr>
+                    <!-- Check if the account status is APPROVED before rendering the row -->
+                    <tr th:if="${account.status.name() == 'ACTIVE'}">
                         <td th:text="${account.accountType.name}"></td> <!-- Display account type -->
                         <td th:text="${account.accountNumber}"></td>
                         <td th:text="${account.balance}"></td>

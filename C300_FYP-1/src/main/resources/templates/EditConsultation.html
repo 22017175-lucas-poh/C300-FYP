@@ -46,6 +46,7 @@
 </head>
 <body>
     <div class="container">
+    <div th:replace="fragments/header"></div>
         <h1>Edit Consultation</h1>
         <form th:action="@{/consultations/edit/{id}(id=${consultation.id})}" method="post">
             <div class="mb-3">

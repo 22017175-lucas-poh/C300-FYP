@@ -51,14 +51,16 @@ public class DashboardController {
         if (loggedInMember == null) {
             return "redirect:/login"; // Redirect to login if member is not found
         }
-
-        // Fetch related data
+        
+        // Fetch data
         List<Card> userCards = cardRepository.findByMember(loggedInMember);
+        List<Account> userAccounts = accountRepository.findByMember(loggedInMember);
         List<Consultation> userConsultations = consultationRepository.findByMember(loggedInMember);
 
         // Add attributes to the model for display on the dashboard
         model.addAttribute("member", loggedInMember);
         model.addAttribute("listCards", userCards);
+        model.addAttribute("listAccounts", userAccounts);
         model.addAttribute("listConsultations", userConsultations);
 
         return "Dashboard"; // Return the dashboard view

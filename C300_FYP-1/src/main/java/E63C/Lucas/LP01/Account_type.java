@@ -29,7 +29,8 @@ public class Account_type {
 
     private String name;  
     private String description; 
-
+    private double interestRate;
+    
 //    @OneToMany(mappedBy = "account_type")
 //    private Set<Card> card;
 
@@ -60,4 +61,14 @@ public class Account_type {
     public void setDescription(String description) {
         this.description = description;
     }
+
+	public double getInterestRate() {
+		return interestRate;
+	}
+
+	public void setInterestRate(double interestRate) {
+		this.interestRate = interestRate;
+	}
+    
+    
 }

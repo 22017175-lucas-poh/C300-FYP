@@ -70,7 +70,7 @@ nav {
 }
 
 nav .navbar-brand img {
-	height: 40px;
+	height: 60px;
 }
 
 .ham-menu {
@@ -156,13 +156,18 @@ nav .navbar-brand img {
 
 	<!-- Off-Screen Menu -->
 	 <div class="off-screen-menu">
-        <a href="/">Home</a>
+        <a href="/" sec:authorize="!isAuthenticated()">Home</a>
+        <a href="/dashboard" sec:authorize="isAuthenticated()">Home</a>
+        <a href="/calculator">Interest Calculator</a> 
         <a href="/Card">Manage Card</a> 
         <a href="/Account">Manage Accounts</a>
-        <a href="/consultations">Book Consultation</a>        
-        <a href="/Admin/Card" sec:authorize="hasAnyRole('ROLE_BO', 'ROLE_FA')">Manage Card</a>
-        <a href="/Admin/consultations" sec:authorize="hasRole('ROLE_FA')">Manage Consultations</a>
+        <a href="/consultations">Book Consultation</a>
+        <a href="/Admin/consultations" sec:authorize="hasRole('ROLE_FA')">View All Consultation</a>
+        <a href="/Admin/Card" sec:authorize="hasAnyRole('ROLE_BO', 'ROLE_FA')">View All Card</a>
+        <a href="/Admin/Account" sec:authorize="hasAnyRole('ROLE_BO', 'ROLE_FA')">View All Account</a>
         <a href="/Member" sec:authorize="hasRole('ROLE_BO')">Manage Member</a>
+        <a href="/Member/detail" sec:authorize="hasRole('ROLE_USER')">Edit Your Details</a>
+        <a href="/contact">Contact Us</a>
         <a sec:authorize="!isAuthenticated()" href="/login">Login</a>
 
         <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post">

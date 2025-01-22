@@ -34,7 +34,8 @@ public class WebSecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
 				.requestMatchers("/Admin/Card", "/Admin/Card/Approve/*", "/Admin/Card/Reject/*", "/Admin/Card/Edit/*",
-						"/Admin/Card/Delete/*")
+						"/Admin/Card/Delete/*","/Admin/Account","/Admin/Account/Edit/*","/Admin/Account/Approve/*","/Admin/Account/Reject/*",
+						"/Admin/Account/Export")
 //						"/Account_type", "/Account_type/add", "/Account_type/edit/*","/Account_type/delete/*")
 				.hasAnyRole("BO", "FA")
 				.requestMatchers("/Member",
@@ -48,7 +49,7 @@ public class WebSecurityConfig {
 				.requestMatchers("/bootstrap/*/*").permitAll() // for static resources, visible to all
 				.requestMatchers("/images/*").permitAll() // for static resources, visible to all
 				.anyRequest().authenticated())// Any other requests not specified earlier
-				.formLogin((login) -> login.loginPage("/login").permitAll().defaultSuccessUrl("/",true)) // Goes to homepage
+				.formLogin((login) -> login.loginPage("/login").permitAll().defaultSuccessUrl("/dashboard",true)) // Goes to homepage
 																									// upon login
 				.logout((logout) -> logout.logoutSuccessUrl("/"))// Goes to homepage upon logout
 				.exceptionHandling((exceptionHandling) -> exceptionHandling.accessDeniedPage("/403"));

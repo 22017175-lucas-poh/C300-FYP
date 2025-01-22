@@ -16,8 +16,23 @@ public class Consultation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id; // Add an ID field for unique identification of each consultation
 
-    private Date consultationDate; 
-    private String consultantName;
+    private Date consultationDate;
+    private String consultationTime;
+    /**
+	 * @return the consultationTime
+	 */
+	public String getConsultationTime() {
+		return consultationTime;
+	}
+
+	/**
+	 * @param consultationTime the consultationTime to set
+	 */
+	public void setConsultationTime(String consultationTime) {
+		this.consultationTime = consultationTime;
+	}
+
+	private String consultantName;
 
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false) 

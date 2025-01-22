@@ -20,6 +20,7 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     // Update the method to use accountName instead of name
     List<Account> findByAccountName(String accountName);  
     List<Account> findByMemberId(Integer memberId);
+    List<Account> findByMember(Member member);
     
     Account findFirstByAccountNumber(String accountNumber);
     
