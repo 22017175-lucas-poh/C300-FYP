@@ -28,64 +28,71 @@ import org.springframework.mail.javamail.JavaMailSender;
  */
 @Controller
 public class HomeController {
+
+    @Autowired
+    private JavaMailSender javaMailSender;
+
+    @GetMapping("/")
+    public String home() {
+        return "index";
+    }
+
+    @GetMapping("/403")
+    public String error403() {
+        return "403";
+    }
+
+    @GetMapping("/calculator")
+    public String calculator() {
+        return "calculator";
+    }
+
+    @GetMapping("/contact")
+    public String contact() {
+        return "contact";
+    }
+
+    public void sendEmail(String to, String subject, String body) {
+        try {
+            SimpleMailMessage msg = new SimpleMailMessage();
+            msg.setTo(to);
+            msg.setSubject(subject);
+            msg.setText(body);
+            msg.setFrom("musashibestgirl990@gmail.com"); 
+
+            javaMailSender.send(msg);
+            System.out.println("Email sent successfully to: " + to);
+        } catch (Exception e) {
+            System.err.println("Failed to send email to " + to + ": " + e.getMessage());
+            throw new RuntimeException("Email sending failed", e);
+        }
+    }
+
 	
-	@Autowired
-	private JavaMailSender javaMailSender;
-	
-		@GetMapping("/")
-		public String home() {
-			return"index";
-		}
-		@GetMapping("/403")
-		public String error403() {
-			return"403";
-		}
-		@GetMapping("/calculator")
-		public String calculator() {
-			return"calculator";
-		}
-		@GetMapping("/contact")
-		public String contact() {
-			return"contact";
-		}
-		
-		@PostMapping("/submitContact")
-		public String submitContact(@RequestParam String name, @RequestParam String email,
-		                             @RequestParam String subject, @RequestParam String message,
-		                             RedirectAttributes redirectAttributes) {
-		    try {
-		        sendFeedbackEmail(email, name, subject, message);
-		        redirectAttributes.addFlashAttribute("success", "Your message has been sent successfully!");
-		    } catch (Exception e) {
-		        redirectAttributes.addFlashAttribute("error", "An error occurred while sending your message. Please try again.");
-		        e.printStackTrace();
-		    }
+    @PostMapping("/submitContact")
+    public String submitContact(@RequestParam("name") String name,
+                                @RequestParam("email") String email,
+                                @RequestParam("message") String message,
+                                RedirectAttributes redirectAttributes) {
+        // Compose the email subject and body
+        String subject = "Contact Form Submission Received";
+        String body = "Dear " + name + ",\n\nThank you for reaching out to us at RP Digital Bank.\n\n" +
+                      "We have received your message:\n\n" +
+                      "\"" + message + "\"\n\n" +
+                      "Our team will get back to you shortly. If you have any urgent concerns, please do not hesitate to contact us directly.\n\n" +
+                      "Best regards,\nRP Digital Bank Team";
 
-		    return "redirect:/contact"; // Ensure '/contact' is correctly mapped
-		}
+        // Send email to the user
+        try {
+            sendEmail(email, subject, body);
+            redirectAttributes.addFlashAttribute("success", "Your message has been sent successfully!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "There was an error sending your message. Please try again later.");
+        }
 
-		
-		// Feedback email logic
-		public void sendFeedbackEmail(String senderEmail, String name, String subject, String message) {
-		    String emailBody = "Feedback from: " + name + "\nEmail: " + senderEmail +
-		                       "\n\nSubject: " + subject + "\n\nMessage:\n" + message;
-
-		    sendEmail("lutfilh2702@gmail.com", "New Feedback from RP Digital Bank", emailBody);
-		}
-		
-		public void sendEmail(String to, String subject, String body) {
-		    try {
-		        SimpleMailMessage msg = new SimpleMailMessage();
-		        msg.setTo(to);
-		        msg.setSubject(subject);
-		        msg.setText(body);
-		        msg.setFrom("musashibestgirl990@gmail.com"); // Ensure 'From' email matches SMTP settings
-
-		        javaMailSender.send(msg);
-		        System.out.println("Email sent successfully to: " + to);
-		    } catch (Exception e) {
-		        System.err.println("Failed to send email to: " + to);
-		        e.printStackTrace();
-		    }
-		}
+        return "redirect:/contact";
+    }
+    
 }
+

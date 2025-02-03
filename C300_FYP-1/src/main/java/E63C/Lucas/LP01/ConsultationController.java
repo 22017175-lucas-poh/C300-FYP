@@ -5,8 +5,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -24,9 +22,7 @@ public class ConsultationController {
     private MemberRepository memberRepository;
     @Autowired
     private ConsultantRepository consultantRepository;
-    @Autowired
-	private JavaMailSender javaMailSender;
-    
+
     @GetMapping("/consultations")
     public String viewConsultations(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -68,13 +64,11 @@ public class ConsultationController {
             LocalDate consultationDate = consultation.getConsultationDate().toLocalDate();
             DayOfWeek dayOfWeek = consultationDate.getDayOfWeek();
 
-            // Restrict bookings during weekends
             if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
                 model.addAttribute("error", "Consultations cannot be booked on weekends.");
                 return "BookConsultation";
             }
 
-            // Check if the user already has 3 consultations on the same day
             List<Consultation> existingConsultations = consultationRepository.findByMemberAndConsultationDate(
                 loggedInMember, consultation.getConsultationDate());
             if (existingConsultations.size() >= 3) {
@@ -82,26 +76,54 @@ public class ConsultationController {
                 return "BookConsultation";
             }
 
+            List<Consultation> overlappingConsultations = consultationRepository.findByConsultantNameAndConsultationDateAndConsultationTime(
+                consultation.getConsultantName(), consultation.getConsultationDate(), consultation.getConsultationTime());
+
+            if (!overlappingConsultations.isEmpty()) {
+                model.addAttribute("error", "This time slot is already booked with the selected consultant. Please choose a different time.");
+                return "BookConsultation";
+            }
+
             consultation.setMember(loggedInMember);
             consultationRepository.save(consultation);
-
-            // Send email to admin after successful booking
-            String adminEmail = "musashibestgirl990@gmail.com";
-            String subject = "New Consultation Booking";
-            String body = "A new consultation has been booked with the following details:\n" +
-                "Consultation ID: " + consultation.getId() + "\n" +
-                "Consultation Date: " + consultation.getConsultationDate() + "\n" +
-                "Consultation Time: " + consultation.getConsultationTime() + "\n" +
-                "Consultant Name: " + consultation.getConsultantName() + "\n" +
-                "Member Name: " + loggedInMember.getName() + "\n\n" +
-                "Please review the booking.";
-
-            sendEmail(adminEmail, subject, body);
 
             model.addAttribute("consultation", consultation);
             return "Confirmation";
         }
 
+        return "redirect:/consultations";
+    }
+
+    @PostMapping("/consultations/edit/{id}")
+    public String updateConsultation(@PathVariable("id") int id, Consultation updatedConsultation, Model model) {
+        Consultation existingConsultation = consultationRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Invalid consultation ID:" + id));
+
+        List<Consultation> overlappingConsultations = consultationRepository
+            .findByConsultantNameAndConsultationDateAndConsultationTime(
+                updatedConsultation.getConsultantName(), 
+                updatedConsultation.getConsultationDate(), 
+                updatedConsultation.getConsultationTime()
+            );
+
+        // Exclude the current consultation from overlap check
+        overlappingConsultations.removeIf(c -> c.getId() == id);
+
+        // Error handling for overlapping consultations
+        if (!overlappingConsultations.isEmpty()) {
+            model.addAttribute("error", "This time slot is already booked with the selected consultant.");
+            model.addAttribute("consultation", existingConsultation);
+            model.addAttribute("consultants", consultantRepository.findAll());  
+            model.addAttribute("existingConsultations", consultationRepository.findByConsultationDate(updatedConsultation.getConsultationDate()));
+            return "EditConsultation";
+        }
+
+        // Proceed if no overlap
+        existingConsultation.setConsultationDate(updatedConsultation.getConsultationDate());
+        existingConsultation.setConsultantName(updatedConsultation.getConsultantName());
+        existingConsultation.setConsultationTime(updatedConsultation.getConsultationTime());
+
+        consultationRepository.save(existingConsultation);
         return "redirect:/consultations";
     }
 
@@ -117,7 +139,23 @@ public class ConsultationController {
     public String editConsultation(@PathVariable("id") int id, Model model) {
         Consultation consultation = consultationRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Invalid consultation Id:" + id));
+
+        List<Consultant> activeConsultants = consultantRepository.findAll()
+            .stream()
+            .filter(consultant -> consultant.getDateLeft() == null)
+            .toList();
+
+        // Get existing consultations for the same date (excluding the current one)
+        List<Consultation> existingConsultations = consultationRepository
+            .findByConsultationDate(consultation.getConsultationDate())
+            .stream()
+            .filter(c -> c.getId() != id) 
+            .toList();
+
         model.addAttribute("consultation", consultation);
+        model.addAttribute("consultants", activeConsultants);
+        model.addAttribute("existingConsultations", existingConsultations);  // Add this line
+
         return "EditConsultation";
     }
 
@@ -128,34 +166,9 @@ public class ConsultationController {
         consultationRepository.delete(consultation);
         return "redirect:/consultations";
     }
-
-    @PostMapping("/consultations/edit/{id}")
-    public String updateConsultation(@PathVariable("id") int id, Consultation updatedConsultation) {
-        Consultation existingConsultation = consultationRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Invalid consultation ID:" + id));
-
-        existingConsultation.setConsultationDate(updatedConsultation.getConsultationDate());
-        existingConsultation.setConsultantName(updatedConsultation.getConsultantName());
-        existingConsultation.setConsultationTime(updatedConsultation.getConsultationTime());
-
-        consultationRepository.save(existingConsultation);
-        return "redirect:/consultations";
-    }
-	public void sendEmail(String to, String subject, String body) {
-		try {
-			SimpleMailMessage msg = new SimpleMailMessage();
-			msg.setTo(to);
-			msg.setSubject(subject);
-			msg.setText(body);
-			msg.setFrom("musashibestgirl990@gmail.com");
-
-			javaMailSender.send(msg);
-			System.out.println("Email sent successfully to: " + to);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 }
+
+
 
     
 

@@ -13,54 +13,76 @@
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 	margin-top: 20px;
 }
+
+.locked {
+	background-color: #e9ecef;
+	cursor: not-allowed;
+}
 </style>
 </head>
 <body>
 	<div class="container">
-        <div th:replace="fragments/header"></div>
-        <main>
-            <h1>Edit Member</h1>
-            <form th:action="@{/Member/edit/{id}(id=${member.id})}" th:object="${member}" method="post" novalidate>
-               <!--  <div class="mb-3 col-5">
-                    <label for="customId" class="form-label">ID</label>
-                    <input id="customId" class="form-control" type="text" th:field="*{customId}" readonly>
-                </div> -->
-                <div class="mb-3 col-5">
-                    <label for="member_name" class="form-label">Name</label>
-                    <input id="member_name" class="form-control" type="text" th:field="*{name}">
-                </div>
-                <div class="mb-3 col-5">
-                    <label for="member_username" class="form-label">Username</label>
-                    <input id="member_username" class="form-control" type="text" th:field="*{username}">
-                </div>
-                <div class="mb-3 col-5">
-                    <label for="member_email" class="form-label">Email</label>
-                    <input id="member_email" class="form-control" type="email" th:field="*{email}">
-                </div>
-                <div class="mb-3 col-5">
-                    <label for="member_password" class="form-label">Password</label>
-                    <input id="member_password" class="form-control" type="text" th:field="*{password}" readonly>
-                </div>
-                <div class="mb-3 col-5">
-                    <label for="member_nric" class="form-label">NRIC</label>
-                    <input id="member_nric" class="form-control" type="text" th:field="*{nric}" readonly>
-                </div>
-                <div class="mb-3 col-5">
-                    <label for="member_role" class="form-label">Role</label>
-                    <select id="member_role" class="form-control" th:field="*{role}">
-                        <option value="ROLE_USER">User</option>
-                        <option value="ROLE_BO">Back Office</option>
-                        <option value="ROLE_FA">Financial Advisor</option>
-                    </select>
-                </div>
-                <div class="mb-3 col-5">
+		<div th:replace="fragments/header"></div>
+		<main>
+			<h1>Edit Member</h1>
+			<form th:action="@{/Member/edit/{id}(id=${member.id})}"
+				th:object="${member}" method="post" novalidate>
+				<div class="mb-3 col-5">
+					<label for="customId" class="form-label">ID</label> <input
+						id="customId" class="form-control" type="text"
+						th:field="*{customId}" th:disabled="${member.role == 'ROLE_USER'}"
+						th:classappend="${member.role == 'ROLE_USER'} ? 'locked' : ''">
+				</div>
+				<div class="mb-3 col-5">
+					<label for="member_name" class="form-label">Name</label> <input
+						id="member_name" class="form-control" type="text"
+						th:field="*{name}" th:disabled="${member.role == 'ROLE_USER'}"
+						th:classappend="${member.role == 'ROLE_USER'} ? 'locked' : ''">
+				</div>
+				<div class="mb-3 col-5">
+					<label for="member_username" class="form-label">Username</label> <input
+						id="member_username" class="form-control" type="text"
+						th:field="*{username}" th:disabled="${member.role == 'ROLE_USER'}"
+						th:classappend="${member.role == 'ROLE_USER'} ? 'locked' : ''">
+				</div>
+				<div class="mb-3 col-5">
+					<label for="member_email" class="form-label">Email</label> <input
+						id="member_email" class="form-control" type="email"
+						th:field="*{email}" th:disabled="${member.role == 'ROLE_USER'}"
+						th:classappend="${member.role == 'ROLE_USER'} ? 'locked' : ''">
+				</div>
+				<div class="mb-3 col-5">
+					<label for="member_password" class="form-label">Password</label> <input
+						id="member_password" class="form-control" type="text"
+						th:disabled="${member.role == 'ROLE_USER'}"
+						th:classappend="${member.role == 'ROLE_USER'} ? 'locked' : ''">
+				</div>
+				<div class="mb-3 col-5">
+					<label for="member_nric" class="form-label">NRIC</label> <input
+						id="member_nric" class="form-control" type="text"
+						th:field="*{nric}" th:disabled="${member.role == 'ROLE_USER'}"
+						th:classappend="${member.role == 'ROLE_USER'} ? 'locked' : ''">
+				</div>
+				<div class="mb-3 col-5">
+					<label for="member_role" class="form-label">Role</label> <select
+						id="member_role" class="form-control" th:field="*{role}"
+						th:disabled="${member.role == 'ROLE_USER'}">
+						<option value="ROLE_USER"
+							th:selected="${member.role == 'ROLE_USER'}">User</option>
+						<option value="ROLE_BO" th:selected="${member.role == 'ROLE_BO'}">Back
+							Office</option>
+						<option value="ROLE_FA" th:selected="${member.role == 'ROLE_FA'}">Financial
+							Advisor</option>
+					</select>
+				</div>
+				<div class="mb-3 col-5">
                     <label for="accountNonLocked" class="form-label">Account Status</label>
                     <select id="accountNonLocked" class="form-control" th:field="*{accountNonLocked}">
-                        <option value="true">Unlocked</option>
-                        <option value="false">Locked</option>
+                        <option value="true" th:selected="${member.accountNonLocked}">Unlocked</option>
+                        <option value="false" th:selected="${!member.accountNonLocked}">Locked</option>
                     </select>
                 </div>
-                <div th:if="*{accountNonLocked == false}" class="locked-fields">
+                <div th:if="${member.accountNonLocked == false}" class="locked-fields">
                     <div class="mb-3 col-5">
                         <label for="failedAttempt" class="form-label">Failed Attempts</label>
                         <input id="failedAttempt" class="form-control" type="number" th:field="*{failedAttempt}">
@@ -69,73 +91,37 @@
                         <label for="lockTime" class="form-label">Lock Time</label>
                         <input id="lockTime" class="form-control" type="datetime-local" th:field="*{lockTime}">
                     </div>
-                </div>
-                <div class="mt-3 mb-5">
-                    <input type="submit" value="Update Member" class="btn btn-primary">
-                </div>
-            </form>
-        </main>
-        <div th:replace="fragments/footer"></div>
-    </div>
+                </div>  
+				<div class="mt-3 mb-5">
+					<input type="submit" value="Update Member" class="btn btn-primary">
+					<a href="/Member" class="btn btn-danger">Back</a>
+					<!-- Back button -->
+				</div>
+			</form>
+		</main>
+		<div th:replace="fragments/footer"></div>
+	</div>
 	<script>
-		document.addEventListener("DOMContentLoaded", function() {
-			// Make NRIC non-editable
-			const nricField = document.getElementById("member_nric");
-			const originalNric = nricField.value;
-			nricField.value = 'XXXXX' + originalNric.slice(-4);
+        document.addEventListener("DOMContentLoaded", function() {
+            // Make NRIC non-editable
+            const nricField = document.getElementById("member_nric");
+            const originalNric = nricField.value;
+            nricField.value = 'XXXXX' + originalNric.slice(-4); 
 
-			document.addEventListener("DOMContentLoaded", function() {
-			    const roleField = document.getElementById("member_role");
-			    const customIdField = document.getElementById("customId");
+            const roleField = document.getElementById("member_role");
+            const customIdField = document.getElementById("customId");
 
-			    // Function to update customId based on role
-			    function updateCustomId() {
-			        const currentId = customIdField.value; // e.g., BO00001, UR00001
-			        if (currentId.length <= 2) {
-			            console.error("Invalid customId format:", currentId);
-			            return;
-			        }
-
-			        // Extract the numeric part of the ID
-			        const numericPart = currentId.slice(2); // e.g., 00001
-			        let prefix;
-
-			        // Determine prefix based on role
-			        switch (roleField.value) {
-			            case "ROLE_BO":
-			                prefix = "BO";
-			                break;
-			            case "ROLE_FA":
-			                prefix = "FA";
-			                break;
-			            case "ROLE_USER":
-			                prefix = "UR";
-			                break;
-			            default:
-			                console.error("Unknown role value:", roleField.value);
-			                return;
-			        }
-
-			        // Update the customId field
-			        customIdField.value = prefix + numericPart;
-			        console.log("Custom ID updated to:", customIdField.value);
-			    }
-
-			    // Add event listener to detect role changes
-			    roleField.addEventListener("change", updateCustomId);
-			});
-
-
-			
-			// Toggle locked fields
-			const accountNonLockedField = document.getElementById("accountNonLocked");
-			const lockedFields = document.querySelector(".locked-fields");
-			function toggleLockedFields() {
-				lockedFields.style.display = accountNonLockedField.value === "false" ? "block" : "none";
-			}
-			toggleLockedFields();
-			accountNonLockedField.addEventListener("change", toggleLockedFields);
-		});
-	</script>
+            // Validate NRIC on form submission
+            const form = document.querySelector("form");
+            form.addEventListener("submit", function(event) {
+                const nricRegex = /^[ST]\d{7}[A-Z]$/;
+                if (!nricRegex.test(nricField.value)) {
+                    alert("Invalid NRIC format. It must start with 'S', 'T' followed by 7 digits and an uppercase letter.");
+                    nricField.focus();
+                    event.preventDefault();
+                }
+            });
+        });
+    </script>
 </body>
 </html>

@@ -21,10 +21,9 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
 
 	@Query("SELECT MAX(m.customId) FROM Member m WHERE m.customId LIKE CONCAT(:prefix, '%')")
 	String findMaxCustomIdByPrefix(@Param("prefix") String prefix);
-	
+	Member findById(int id);
 	Member getByUsername(String username);
-
 	Member accountNonLocked(boolean accountNonLocked);
-	
 	Member findByEmail(String email);
+	Member findByNric(String nric);
 }

@@ -43,6 +43,7 @@
             <div class="alert alert-primary success-alert" role="alert"
                  th:text="${success}" th:if="${success}"></div>
             <a href="/Member/add" class="btn btn-success add-member-btn">Add Member</a>
+            <a href="/Member/Export" class="btn btn-primary">Export Members CSV</a>
             <div class="table-container">
                 <table class="table table-bordered table-striped">
                     <thead>
@@ -68,6 +69,7 @@
                             <td class="action-buttons">
                                 <a th:href="@{/Member/edit/{id}(id=${member.id})}" class="btn btn-primary">Edit</a>
                                 <button th:onclick="'confirmDelete(' + ${member.id} + ')'" class="btn btn-danger">Delete</button>
+                                <a th:if="${member.role == 'ROLE_USER'}" th:href="@{/Admin/Member/Report/{id}(id=${member.id})}" class="btn btn-warning">Report</a>
                             </td>
                         </tr>
                     </tbody>

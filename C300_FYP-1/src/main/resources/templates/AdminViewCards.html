@@ -102,6 +102,25 @@
                                 </form>
                             </span>
 
+                <!-- Actions for PENDING status -->
+                            <span th:if="${Card.status.name() == 'CANCELLED_PENDING'}">
+                                <form
+                                    th:action="@{/Admin/Card/Cancel/Approve/{id}(id=${Card.id})}"
+                                    method="post" style="display: inline;">
+                                    <a href="#" class="text-success"
+                                        onclick="if(confirmAction('approve')) this.closest('form').submit(); return false;">Approve</a>
+                                </form>
+                                <span>|</span>
+                                <form
+                                    th:action="@{/Admin/Card/Cancel/Reject/{id}(id=${Card.id})}"
+                                    method="post" style="display: inline;">
+                                    <a href="#" class="text-danger"
+                                        onclick="if(confirmAction('reject')) this.closest('form').submit(); return false;">Reject</a>
+                                </form>
+                            </span>
+
+
+
                             <!-- Actions for APPROVED, REJECTED, or CANCELLED status -->
                             <span th:if="${Card.status.name() == 'APPROVED' or Card.status.name() == 'REJECTED' or Card.status.name() == 'CANCELLED'}">
                                 <a th:href="@{/Admin/Card/Edit/{id}(id=${Card.id})}"

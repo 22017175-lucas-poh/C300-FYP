@@ -10,7 +10,9 @@
     <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+        rel="stylesheet">
 
     <!-- Custom Styles -->
     <style>
@@ -18,105 +20,149 @@
             font-family: 'Poppins', sans-serif;
             background-color: #f8f9fc;
             color: #333;
+            margin: 0;
+            padding: 0;
         }
 
-        /* Contact Section */
         .contact-section {
             padding: 50px 20px;
+            max-width: 800px;
+            margin: 0 auto;
         }
+
         .contact-section h1 {
             text-align: center;
             color: #4e73df;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+            font-weight: 600;
         }
-        .form-control, .btn {
+
+        .contact-section p {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+        }
+
+        form {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        form label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 5px;
+            color: #4e73df;
+        }
+
+        form input, form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
             border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 16px;
         }
-        .btn {
+
+        form input:focus, form textarea:focus {
+            outline: none;
+            border-color: #4e73df;
+            box-shadow: 0px 0px 8px rgba(78, 115, 223, 0.5);
+        }
+
+        form button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
             background-color: #4e73df;
             color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
-        .btn:hover {
+
+        form button:hover {
             background-color: #3b5bbb;
         }
 
-        /* Map Section */
+        .alert {
+            max-width: 800px;
+            margin: 10px auto;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
         .map-container {
             margin-top: 50px;
             text-align: center;
         }
+
+        .map-container h2 {
+            color: #4e73df;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
         iframe {
             border: none;
             width: 100%;
             height: 400px;
-        }
-
-        /* Footer */
-        footer {
-            background-color: #333;
-            color: white;
-            padding: 30px 0;
-            text-align: center;
-        }
-        footer a {
-            color: #1cc88a;
-            text-decoration: none;
-            margin: 0 10px;
-        }
-        footer a:hover {
-            text-decoration: underline;
+            border-radius: 15px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div th:replace="fragments/header"></div>
-    </header>
+    <header><div th:replace="fragments/header"></div></header>
 
     <!-- Contact Section -->
     <section class="contact-section container">
         <h1>Contact Us</h1>
-        <p class="text-center mb-5">Have questions or need help? Fill out the form below, and our team will get back to you as soon as possible.</p>
+        <p class="text-center mb-5">Have questions or need help? Fill out
+            the form below, and our team will get back to you as soon as
+            possible.</p>
 
-        <form action="/submitContact" method="post" class="row g-3">
-            <div class="col-md-6">
-                <label for="name" class="form-label">Your Name</label>
-                <input type="text" class="form-control" id="name" name="name" placeholder="Enter your name" required>
+        <!-- Display success or error messages -->
+        <div th:if="${success}" class="alert alert-success text-center"
+            role="alert">
+            <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="alert alert-danger text-center"
+            role="alert">
+            <span th:text="${error}"></span>
+        </div>
+
+        <form action="/submitContact" method="post" th:action="@{/submitContact}">
+            <div>
+                <label for="name">Name:</label> <input type="text" id="name"
+                    name="name" required>
             </div>
-            <div class="col-md-6">
-                <label for="email" class="form-label">Email Address</label>
-                <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
+            <div>
+                <label for="email">Email:</label> <input type="email" id="email"
+                    name="email" required>
             </div>
-            <div class="col-12">
-                <label for="subject" class="form-label">Subject</label>
-                <input type="text" class="form-control" id="subject" name="subject" placeholder="Enter subject" required>
+            <div>
+                <label for="message">Message:</label>
+                <textarea id="message" name="message" rows="4" required></textarea>
             </div>
-            <div class="col-12">
-                <label for="message" class="form-label">Message</label>
-                <textarea class="form-control" id="message" name="message" rows="5" placeholder="Type your message here..." required></textarea>
-            </div>
-            <div class="col-12 text-center">
-                <button type="submit" class="btn btn-primary px-5">Send Message</button>
-            </div>
+            <button type="submit">Submit</button>
         </form>
 
         <!-- Map Section -->
         <div class="map-container">
             <h2 class="mb-3">Find Us Here</h2>
             <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d199332.54138384767!2d103.69884775951963!3d1.3139965761657095!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31da190f7b823c1d%3A0x6c8f94cbdcf08658!2sSingapore!5e0!3m2!1sen!2ssg!4v1683806621925!5m2!1sen!2ssg"
-                allowfullscreen=""
-                loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade">
-            </iframe>
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3189.8738702157593!2d103.78545677689146!3d1.4423890974983395!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31da175cb71547d7%3A0x5b795c809aad5bfb!2sRepublic%20Polytechnic!5e0!3m2!1sen!2ssg!4v1683806621925!5m2!1sen!2ssg"
+                allowfullscreen="" loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
     </section>
-
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2024 RP Digital Bank. All rights reserved.</p>
-        <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
-    </footer>
+    <div th:replace="fragments/footer"></div>
 </body>
 </html>

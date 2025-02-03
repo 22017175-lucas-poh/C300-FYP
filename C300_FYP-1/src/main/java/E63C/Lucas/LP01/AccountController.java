@@ -13,7 +13,8 @@
 	
 	package E63C.Lucas.LP01;
 	
-	import java.io.PrintWriter;
+	import java.io.IOException;
+import java.io.PrintWriter;
 import java.security.Principal;
 import java.sql.Date;
 import java.time.LocalDate;
@@ -21,9 +22,11 @@ import java.util.List;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -32,7 +35,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 	
@@ -99,45 +105,84 @@ import jakarta.servlet.http.HttpSession;
 		 * @return Redirect to the accounts list or back to the form in case of errors
 		 */
 		@PostMapping("/Account/save")
-		public String saveAccount(Account account, Model model) {
+		public String saveAccount(
+		        @RequestParam("passportImage") MultipartFile passportImage, // Get the image file
+		        Account account,
+		        Model model) {
+
 		    // Get the currently logged-in user's ID
 		    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		    String loggedInUsername = authentication.getName(); // Assuming username is unique
+		    String loggedInUsername = authentication.getName();
 		    Integer loggedInUserId = getCurrentUserId(loggedInUsername);
 
-		    // Fetch the Member entity using the logged-in user's ID
+		    // Fetch the Member entity
 		    Member member = memberRepository.findById(loggedInUserId).orElse(null);
 		    if (member == null) {
 		        model.addAttribute("error", "Member not found.");
-		        return "redirect:/Account"; // Handle the error properly
+		        return "redirect:/Account";
 		    }
 
-		    // Set default values
-		    account.setStatus(Account.AccountStatus.PENDING); // Default status
-		    account.setAccountNumber(generateRandomAccountNumber()); // Generate random account number
-		    account.setCreationDate(Date.valueOf(LocalDate.now())); // Set today's date as java.sql.Date
-		    account.setBalance(0.0); // Default balance
+		    // Set default values for the account
+		    account.setStatus(Account.AccountStatus.PENDING);
+		    account.setAccountNumber(generateRandomAccountNumber());
+		    account.setCreationDate(Date.valueOf(LocalDate.now()));
+		    account.setBalance(0.0);
 		    account.setBankName("RP Digital Bank");
-		    account.setMember(member); // Associate account with the logged-in user (member)
+		    account.setMember(member);
 
-		    accountRepository.save(account); // Save the account
+		    accountRepository.save(account);
 
-		    // Send email to admin
-		    String adminEmail = "musashibestgirl990@gmail.com"; // Admin email address
+		    // Prepare email details
 		    String subject = "New Account Application Received";
-		    String body = "A new account has been applied with the following details:\n"
-		            + "Account Number: " + account.getAccountNumber() + "\n"
-		            + "Account Type: " + account.getAccountType().getName() + "\n"
-		            + "Holder Name: " + account.getHolderName() + "\n"
-		            + "Bank Name: " + account.getBankName() + "\n\n"
-		            + "Please review this application.";
+		    String body = "<p>A new account has been applied with the following details:</p>"
+		            + "<p><strong>Account Number:</strong> " + account.getAccountNumber() + "</p>"
+		            + "<p><strong>Account Type:</strong> " + account.getAccountType().getName() + "</p>"
+		            + "<p><strong>Holder Name:</strong> " + account.getHolderName() + "</p>"
+		            + "<p><strong>Bank Name:</strong> " + account.getBankName() + "</p>"
+		            + "<p>Please review this application.</p>";
 
-		    sendEmail(adminEmail, subject, body);
+		    // Send email with the uploaded passport image
+		    try {
+		        sendEmailWithInlineImage("musashibestgirl990@gmail.com", subject, body, passportImage);
+		    } catch (Exception e) {
+		        model.addAttribute("error", "Failed to send email: " + e.getMessage());
+		        return "redirect:/Account";
+		    }
 
-		    return "redirect:/Account"; // Redirect to the account list page
+		    return "redirect:/Account";
 		}
 
-	
+		private void sendEmailWithInlineImage(String to, String subject, String body, MultipartFile imageFile) throws MessagingException, IOException {
+		    MimeMessage message = javaMailSender.createMimeMessage();
+		    MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+		    helper.setTo(to);
+		    helper.setSubject(subject);
+		    helper.setFrom("musashibestgirl990@gmail.com");
+		    helper.setText(body, true); // Enable HTML content for body
+
+		    if (imageFile != null && !imageFile.isEmpty()) {
+		        String contentId = "passportImage";  // Unique Content-ID for the image
+
+		        // Add the image as an inline attachment
+		        helper.addInline(contentId, new ByteArrayResource(imageFile.getBytes()), imageFile.getContentType());
+
+		        // Update the email body to reference the inline image
+		        String imageTag = "<p><strong>Uploaded Passport Image:</strong></p>"
+		                + "<img src='cid:" + contentId + "' style='width:300px;height:auto;' />";
+		        helper.setText(body + imageTag, true);
+		    }
+
+		    // Send the email
+		    javaMailSender.send(message);
+		    System.out.println("Email sent successfully with inline image to: " + to);
+		}
+
+
+
+
+
+
 		// Helper method to generate random account number
 		private String generateRandomAccountNumber() {
 			return String.valueOf((long) (Math.random() * 1000000000000L)); // Random 12-digit number

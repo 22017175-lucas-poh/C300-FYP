@@ -39,6 +39,9 @@ public class DashboardController {
 
     @Autowired
     private MemberRepository memberRepository;
+    
+    @Autowired
+    private ConsultantRepository consultantRepository;
 
     @GetMapping("/dashboard")
     public String viewDashboard(Model model) {
@@ -51,19 +54,61 @@ public class DashboardController {
         if (loggedInMember == null) {
             return "redirect:/login"; // Redirect to login if member is not found
         }
-        
-        // Fetch data
-        List<Card> userCards = cardRepository.findByMember(loggedInMember);
-        List<Account> userAccounts = accountRepository.findByMember(loggedInMember);
-        List<Consultation> userConsultations = consultationRepository.findByMember(loggedInMember);
 
-        // Add attributes to the model for display on the dashboard
-        model.addAttribute("member", loggedInMember);
-        model.addAttribute("listCards", userCards);
-        model.addAttribute("listAccounts", userAccounts);
-        model.addAttribute("listConsultations", userConsultations);
+        // Check if the logged-in member has BO or FA roles
+        boolean isBOorFA = authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_BO")
+                        || authority.getAuthority().equals("ROLE_FA"));
 
-        return "Dashboard"; // Return the dashboard view
+        if (isBOorFA) {
+            // Fetch all accounts, cards, consultations, and members for BO/FA
+            List<Account> allAccounts = accountRepository.findAll();
+            List<Card> allCards = cardRepository.findAll();
+            List<Consultation> allConsultations = consultationRepository.findAll();
+            List<Consultant> allConsultant = consultantRepository.findAll();
+            List<Member> allMembers = memberRepository.findAll();
+
+            // Add attributes to the model for the Admin dashboard
+            model.addAttribute("listAccounts", allAccounts);
+            model.addAttribute("listCards", allCards);
+            model.addAttribute("listConsultations", allConsultations);
+            model.addAttribute("listConsultants", allConsultant);
+            model.addAttribute("listMembers", allMembers);
+            model.addAttribute("member", loggedInMember);
+
+            return "dashboardAdmin"; // Return the Admin dashboard view
+        } else {
+            // Fetch data for the logged-in user
+            List<Card> userCards = cardRepository.findByMember(loggedInMember);
+            List<Account> userAccounts = accountRepository.findByMember(loggedInMember);
+            List<Consultation> userConsultations = consultationRepository.findByMember(loggedInMember);
+
+            int activeAccountsCount = 0;
+            int activeCardsCount = 0;
+
+            for (Account account : userAccounts) {
+                if ("ACTIVE".equals(account.getStatus().name())) {
+                    activeAccountsCount++;
+                }
+            }
+
+            // Count active cards
+            for (Card card : userCards) {
+                if ("APPROVED".equals(card.getStatus().name())) {
+                    activeCardsCount++;
+                }
+            }
+            
+            // Add attributes to the model for the User dashboard
+            model.addAttribute("member", loggedInMember);
+            model.addAttribute("listCards", userCards);
+            model.addAttribute("listAccounts", userAccounts);
+            model.addAttribute("listConsultations", userConsultations);
+            model.addAttribute("activeAccountsCount", activeAccountsCount);
+            model.addAttribute("activeCardsCount", activeCardsCount);
+
+            return "dashboard"; // Return the User dashboard view
+        }
     }
-
 }
+
