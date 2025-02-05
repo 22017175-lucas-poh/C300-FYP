@@ -65,12 +65,12 @@ button:hover {
 			<div class="mb-3">
 				<label for="consultationTime" class="form-label">Consultation Time:</label>
 				<select class="form-control" id="consultationTime" name="consultationTime" required>
-					<option value="10:00" th:selected="${consultation.consultationTime == '10:00'}" th:disabled="${#lists.contains(existingConsultations.![consultationTime], '10:00')}">10:00 AM</option>
-					<option value="11:00" th:selected="${consultation.consultationTime == '11:00'}" th:disabled="${#lists.contains(existingConsultations.![consultationTime], '11:00')}">11:00 AM</option>
-					<option value="12:00" th:selected="${consultation.consultationTime == '12:00'}" th:disabled="${#lists.contains(existingConsultations.![consultationTime], '12:00')}">12:00 PM</option>
-					<option value="13:00" th:selected="${consultation.consultationTime == '13:00'}" th:disabled="${#lists.contains(existingConsultations.![consultationTime], '13:00')}">1:00 PM</option>
-					<option value="14:00" th:selected="${consultation.consultationTime == '14:00'}" th:disabled="${#lists.contains(existingConsultations.![consultationTime], '14:00')}">2:00 PM</option>
-					<option value="15:00" th:selected="${consultation.consultationTime == '15:00'}" th:disabled="${#lists.contains(existingConsultations.![consultationTime], '15:00')}">3:00 PM</option>
+					<option value="10:00" th:selected="${consultation.consultationTime == '10:00'}" th:disabled="${existingConsultations != null ? #lists.contains(existingConsultations.![consultationTime], '10:00') : false}">10:00 AM</option>
+					<option value="11:00" th:selected="${consultation.consultationTime == '11:00'}" th:disabled="${existingConsultations != null ? #lists.contains(existingConsultations.![consultationTime], '11:00') : false}">11:00 AM</option>
+					<option value="12:00" th:selected="${consultation.consultationTime == '12:00'}" th:disabled="${existingConsultations != null ? #lists.contains(existingConsultations.![consultationTime], '12:00') : false}">12:00 PM</option>
+					<option value="13:00" th:selected="${consultation.consultationTime == '13:00'}" th:disabled="${existingConsultations != null ? #lists.contains(existingConsultations.![consultationTime], '13:00') : false}">1:00 PM</option>
+					<option value="14:00" th:selected="${consultation.consultationTime == '14:00'}" th:disabled="${existingConsultations != null ? #lists.contains(existingConsultations.![consultationTime], '14:00') : false}">2:00 PM</option>
+					<option value="15:00" th:selected="${consultation.consultationTime == '15:00'}" th:disabled="${existingConsultations != null ? #lists.contains(existingConsultations.![consultationTime], '15:00') : false}">3:00 PM</option>
 				</select>
 			</div>
 
