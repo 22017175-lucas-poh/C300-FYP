@@ -1,5 +1,6 @@
 package E63C.Lucas.LP01;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -7,8 +8,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -28,8 +27,6 @@ public class ConsultationController {
     private MemberRepository memberRepository;
     @Autowired
     private ConsultantRepository consultantRepository;
-    @Autowired
-    private JavaMailSender javaMailSender;
 
     @GetMapping("/consultations")
     public String viewConsultations(Model model) {
@@ -68,138 +65,91 @@ public class ConsultationController {
         Member loggedInMember = memberRepository.findByUsername(username);
 
         if (loggedInMember != null) {
+            LocalDate currentDate = LocalDate.now();
             LocalDate consultationDate = consultation.getConsultationDate().toLocalDate();
-            LocalDate today = LocalDate.now();
             DayOfWeek dayOfWeek = consultationDate.getDayOfWeek();
 
-            // Check if the consultation date is in the past
-            if (consultationDate.isBefore(today)) {
-                model.addAttribute("error", "Consultations cannot be booked for past dates. Please choose a future date.");
+            // Fetch active consultants to repopulate the dropdown in case of error
+            List<Consultant> activeConsultants = consultantRepository.findAll()
+                .stream()
+                .filter(consultant -> consultant.getDateLeft() == null)
+                .toList();
+            model.addAttribute("consultants", activeConsultants);
+
+            // Prevent booking for past dates
+            if (consultationDate.isBefore(currentDate)) {
+                model.addAttribute("error", "You cannot book a consultation for a past date.");
                 return "BookConsultation";
             }
 
             // Prevent booking on weekends
             if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
-                model.addAttribute("error", "Consultations cannot be booked on weekends. Please select a weekday.");
+                model.addAttribute("error", "Consultations cannot be booked on weekends.");
                 return "BookConsultation";
             }
 
-            // Limit the number of consultations per day
-            List<Consultation> existingConsultations = consultationRepository.findByMemberAndConsultationDate(
-                loggedInMember, consultation.getConsultationDate());
-            if (existingConsultations.size() >= 3) {
-                model.addAttribute("error", "You can only book up to 3 consultations per day.");
+            // Enforce global consultation limit (max 3 per day)
+            int totalConsultationsForDay = consultationRepository.countByConsultationDate(consultation.getConsultationDate());
+            if (totalConsultationsForDay >= 3) {
+                model.addAttribute("error", "Only 3 consultations are allowed per day. Please choose a different date.");
                 return "BookConsultation";
             }
 
-            // Check for overlapping consultations with the same consultant
-            List<Consultation> overlappingConsultations = consultationRepository
-                .findByConsultantNameAndConsultationDateAndConsultationTime(
-                    consultation.getConsultantName(),
-                    consultation.getConsultationDate(),
-                    consultation.getConsultationTime()
-                );
 
-            if (!overlappingConsultations.isEmpty()) {
-                model.addAttribute("error", "This time slot is already booked with the selected consultant. Please choose a different time.");
+
+            // Prevent overlapping consultations for the user
+            List<Consultation> userConflictingConsultations = consultationRepository.findByMemberAndConsultationDateAndConsultationTime(
+                loggedInMember, consultation.getConsultationDate(), consultation.getConsultationTime());
+            if (!userConflictingConsultations.isEmpty()) {
+                model.addAttribute("error", "You already have a consultation booked at this time.");
                 return "BookConsultation";
             }
 
-            // ✅ Save the consultation if all checks pass
+            // Save the consultation
             consultation.setMember(loggedInMember);
             consultationRepository.save(consultation);
 
             model.addAttribute("consultation", consultation);
             return "Confirmation";
         }
-
         return "redirect:/consultations";
     }
+
+
 
 
     @PostMapping("/consultations/edit/{id}")
     public String updateConsultation(@PathVariable("id") int id, Consultation updatedConsultation, Model model) {
-        // Get the existing consultation
         Consultation existingConsultation = consultationRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Invalid consultation ID:" + id));
 
-        // Check for overlapping consultations
         List<Consultation> overlappingConsultations = consultationRepository
             .findByConsultantNameAndConsultationDateAndConsultationTime(
-                updatedConsultation.getConsultantName(),
-                updatedConsultation.getConsultationDate(),
+                updatedConsultation.getConsultantName(), 
+                updatedConsultation.getConsultationDate(), 
                 updatedConsultation.getConsultationTime()
             );
 
-        // Remove the current consultation if it is being updated
+        // Exclude the current consultation from overlap check
         overlappingConsultations.removeIf(c -> c.getId() == id);
 
-        // Check if the logged-in member is valid
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        Member loggedInMember = memberRepository.findByUsername(username);
-
-        if (loggedInMember != null) {
-            LocalDate consultationDate = updatedConsultation.getConsultationDate().toLocalDate();
-            LocalDate today = LocalDate.now();
-            DayOfWeek dayOfWeek = consultationDate.getDayOfWeek();
-
-            // Check for overlapping consultations
-            if (!overlappingConsultations.isEmpty()) {
-                model.addAttribute("error", "This time slot is already booked with the selected consultant.");
-                model.addAttribute("consultation", existingConsultation);
-                model.addAttribute("consultants", consultantRepository.findAll());
-                model.addAttribute("existingConsultations", consultationRepository.findByConsultationDate(updatedConsultation.getConsultationDate()));
-                return "EditConsultation";
-            }
-
-            // Ensure consultations are not booked for past dates
-            if (consultationDate.isBefore(today)) {
-                model.addAttribute("error", "Consultations cannot be booked for past dates. Please choose a future date.");
-                model.addAttribute("consultation", existingConsultation);  // Keep existing consultation for editing
-                return "EditConsultation";
-            }
-
-            // Proceed to update the consultation details
-            existingConsultation.setConsultationDate(updatedConsultation.getConsultationDate());
-            existingConsultation.setConsultantName(updatedConsultation.getConsultantName());
-            existingConsultation.setConsultationTime(updatedConsultation.getConsultationTime());
-
-            consultationRepository.save(existingConsultation);
-
-            // Get the email from the Member object
-            Member member = existingConsultation.getMember();
-            if (member == null) {
-                model.addAttribute("error", "No member associated with this consultation.");
-                return "EditConsultation";
-            }
-
-            String customerEmail = member.getEmail(); // Retrieve the email
-
-            // Prepare email details
-            String subject = "Consultation Updated Successfully";
-            String body = "Dear " + member.getName() + ",\n\n"
-                    + "Your consultation has been updated with the following details:\n"
-                    + "Consultant Name: " + existingConsultation.getConsultantName() + "\n"
-                    + "Consultation Date: " + existingConsultation.getConsultationDate() + "\n"
-                    + "Consultation Time: " + existingConsultation.getConsultationTime() + "\n\n"
-                    + "Please review the updated consultation details. If there are any issues, please contact us.";
-
-            // Send email to the member
-            try {
-                sendEmail(customerEmail, subject, body);  
-            } catch (Exception e) {
-                model.addAttribute("error", "Failed to send email: " + e.getMessage());
-                return "redirect:/consultations";
-            }
-        } else {
-            model.addAttribute("error", "You must be logged in to update a consultation.");
-            return "redirect:/consultations";
+        // Error handling for overlapping consultations
+        if (!overlappingConsultations.isEmpty()) {
+            model.addAttribute("error", "This time slot is already booked with the selected consultant.");
+            model.addAttribute("consultation", existingConsultation);
+            model.addAttribute("consultants", consultantRepository.findAll());  
+            model.addAttribute("existingConsultations", consultationRepository.findByConsultationDate(updatedConsultation.getConsultationDate()));
+            return "EditConsultation";
         }
 
+        // Proceed if no overlap
+        existingConsultation.setConsultationDate(updatedConsultation.getConsultationDate());
+        existingConsultation.setConsultantName(updatedConsultation.getConsultantName());
+        existingConsultation.setConsultationTime(updatedConsultation.getConsultationTime());
+
+        consultationRepository.save(existingConsultation);
         return "redirect:/consultations";
     }
-
 
 
     @GetMapping("/Admin/Consultations")
@@ -232,18 +182,22 @@ public class ConsultationController {
 
         return "EditConsultation";
     }
+
+    @GetMapping("/consultations/delete/{id}")
+    public String deleteConsultation(@PathVariable("id") int id) {
+        Consultation consultation = consultationRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Invalid consultation Id:" + id));
+        consultationRepository.delete(consultation);
+        return "redirect:/consultations";
+    }
+    
     @GetMapping("/Admin/Consultations/Export")
     public ResponseEntity<Void> exportConsultationsToCsv(HttpServletResponse response) {
         try {
-            // Set response headers
             response.setContentType("text/csv");
             response.setHeader("Content-Disposition", "attachment; filename=consultations.csv");
 
-            // Retrieve consultation data
-            List<Consultation> consultations = consultationRepository.findAll(); // Replace with consultationService if applicable
-            int consultationCount = consultations.size(); // Count the number of consultations
-
-            // Write CSV data
+            List<Consultation> consultations = consultationRepository.findAll();
             PrintWriter writer = response.getWriter();
             writer.println("Member Name,Consultation Date,Consultation Time,Consultant Name");
 
@@ -254,47 +208,15 @@ public class ConsultationController {
                     consultation.getConsultationTime(),
                     consultation.getConsultantName());
             }
-
-            // Add a summary row with the count
-            writer.println();
-            writer.printf("Total Consultations:,%d%n", consultationCount); // Summary row
-
             writer.flush();
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
-
         return ResponseEntity.ok().build();
     }
+} 
 
-
-
-    @GetMapping("/consultations/delete/{id}")
-    public String deleteConsultation(@PathVariable("id") int id) {
-        Consultation consultation = consultationRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Invalid consultation Id:" + id));
-        consultationRepository.delete(consultation);
-        return "redirect:/consultations";
-    }
-    
-	private void sendEmail(String to, String subject, String body) {
-	    try {
-	        SimpleMailMessage msg = new SimpleMailMessage();
-	        msg.setTo(to);
-	        msg.setSubject(subject);
-	        msg.setText(body);
-	        msg.setFrom("musashibestgirl990@gmail.com");
-
-	        javaMailSender.send(msg);
-	        System.out.println("Email sent successfully to: " + to);
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
-	}
-    
-    
-}
 
 
 
